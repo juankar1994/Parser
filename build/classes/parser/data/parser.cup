@@ -1,0 +1,7 @@
+// definition of tokens, if applicable with token type 
+import java_cup.runtime.*;
+
+terminal OPERADOR, PALABRA_RESERVADA, DIRECTIVA,IDENTIFICADOR;
+terminal ERROR;
+terminal LITERAL_STRING;
+terminal LITERAL_ENTERO, LITERAL_CARACTER, LITERAL_FLOAT, LITERAL_OCTAL, LITERAL_HEXADECIMAL, TIMES, DIV, UMINUS;
