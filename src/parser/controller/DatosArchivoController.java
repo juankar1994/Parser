@@ -16,6 +16,7 @@ import javax.swing.JFileChooser;
 import parser.data.ArchivoData;
 import parser.data.Lexema;
 import parser.data.Lexer;
+import parser.data.Parser;
 import parser.data.Token;
 
 public class DatosArchivoController {
@@ -38,18 +39,22 @@ public class DatosArchivoController {
         File archivo = archivoData.getArchivo();
         
         Reader reader = new BufferedReader(new FileReader(archivo));
-        Lexer lexer = new Lexer (reader);
         
+        Lexer lexer = new Lexer (reader);
         ArrayList<Lexema> lexemas = new ArrayList<>();
         
         while (true){
             int a = lexer.next_token().sym;
-            if(a==11)break;
-            Token token =Token.values()[a];
-            System.out.println(token);
+            if(a==0) break;
             lexemas.add(lexer.lexeme);     
         }
+        
         return lexemas;       
+    }
+    
+    public void analizarArchivoSintactico() {
+        String[] archivo = {archivoData.getArchivo().getAbsolutePath()};
+        Parser.main(archivo);
     }
     
     public ArrayList<ArrayList<Lexema>> separarTokens(ArrayList<Lexema> lexemas){
