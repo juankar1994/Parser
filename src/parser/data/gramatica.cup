@@ -1,5 +1,3 @@
- 
-   
 /* ---------------Seccion de declaraciones preliminares--------------------*/
 package parser.data;
 
@@ -10,7 +8,6 @@ import java.io.FileReader;
 /* Codigo del parser, se copia integramente a la clase final.
     Agregamos el manejo de errores. */
 parser code {:
-    
     /* Reporte de error encontrado. */
     public void report_error(String message, Object info) {
         StringBuilder m = new StringBuilder("Error");
@@ -54,16 +51,20 @@ parser code {:
 /* ------------Declaracion de simbolos terminales y no terminales---------- */
 
 /* OPERADORES */
-terminal            ADD, SUBSTRACT, TIMES, DIVISION;
+terminal            ADD, SUBSTRACT, TIMES, DIVISION, MODULUS;
+terminal            PLUSPLUS, MINUSMINUS, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ;
 
 /* SEPARADORES */
-terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COMMA, DOT;
+terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COL, COMMA, DOT;
 
 /* SENTENCIAS */
 terminal            IF, ELSE, WHILE, DO, FOR, SWITCH;
 
 /* COMPARADORES */
-terminal            EQUAL, MENORQUE, MAYORQUE, EXCLAMACION;
+terminal            ASSIGN, EQUAL, MENORQUE,MENOREQ, MAYORQUE, MAYOREQ, EXCLAMACION, NOTEQ;
+
+/* PALABRAS RESERVADAS */
+terminal            CASE, DEFAULT, RETURN;
 
 /* TIPOS */
 terminal            RETURN_TYPE;
@@ -75,8 +76,9 @@ terminal Integer    LITERAL_ENTERO;
 
 non terminal            programa , def_funcion , funcion , lista_parametros , parametro;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia;
-non terminal            if_statement, while_statement, dowhile_statement, for_statement, switch_stmt, else_statement;
+non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement;
 non terminal            condicion, valor;
+non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
    
 /* ------------------- Seccion de la gramatica ------------------------ */
    
@@ -84,7 +86,8 @@ non terminal            condicion, valor;
 
     def_funcion         ::= RETURN_TYPE IDENTIFICADOR LPAREN lista_parametros RPAREN SEMICOLON;
     
-    funcion             ::= RETURN_TYPE IDENTIFICADOR LPAREN lista_parametros RPAREN bloque;
+    funcion             ::= RETURN_TYPE IDENTIFICADOR:i LPAREN lista_parametros RPAREN bloque
+                        {: System.out.println("id= "+i); :};
 
     lista_parametros    ::= lista_parametros COMMA parametro | parametro |;
 
@@ -96,7 +99,7 @@ non terminal            condicion, valor;
 
     lista_sentencias    ::= lista_sentencias sentencia | sentencia;
 
-    sentencia           ::= if_statement |  while_statement | dowhile_statement;
+    sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | RETURN valor SEMICOLON;
 
 /*
     sentencia           ::= if_statement | while_statement | dowhile_statement | 
@@ -109,26 +112,38 @@ non terminal            condicion, valor;
     /*PONER TODOS LOS LITERALES*/
     valor               ::= IDENTIFICADOR | LITERAL_ENTERO;
                                     
-    condicion           ::= LPAREN valor EQUAL EQUAL valor RPAREN
+    condicion           ::= LPAREN valor EQUAL valor RPAREN
                             |   
                             LPAREN valor MENORQUE valor RPAREN
                             |   
                             LPAREN valor MAYORQUE valor RPAREN
                             |   
-                            LPAREN valor MAYORQUE EQUAL valor RPAREN
+                            LPAREN valor MAYOREQ valor RPAREN
                             |   
-                            LPAREN valor MENORQUE EQUAL valor RPAREN
+                            LPAREN valor MENOREQ valor RPAREN
                             |   
-                            LPAREN valor EXCLAMACION EQUAL valor RPAREN
+                            LPAREN valor NOTEQ valor RPAREN
                             |
                             LPAREN valor RPAREN
                             |
-                            LPAREN error RPAREN {: System.out.println("No se reconoce la condición ingresada.");:};
+                            LPAREN error:e RPAREN 
+                            {: 
+                            :};
 
     else_statement      ::= ELSE bloque_global;
 
     while_statement     ::= WHILE condicion bloque_global;
 
     dowhile_statement   ::= DO bloque_global WHILE LPAREN condicion RPAREN SEMICOLON;
+
+    switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE; 
+    
+    case_body           ::= lista_case | lista_case default_stmt;
+    
+    lista_case          ::= case_stmt | lista_case case_stmt;
+    
+    case_stmt           ::= CASE valor COL sentencia | CASE valor COL LPAREN lista_sentencias RPAREN;
+    
+    default_stmt        ::= DEFAULT COL sentencia | DEFAULT COL LPAREN lista_sentencias RPAREN;
 
     

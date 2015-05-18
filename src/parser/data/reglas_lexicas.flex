@@ -61,12 +61,16 @@ ID = {LETRA}({LETRA}|{DIGITO})*
 DIRECTIVAS = "#"(define|if|elif|message|undef|ifdef|include|else|endif|error)
 SPECIFIER = "typedef" | "extern" | "static" | "auto" | "register" | "const" | "volatile"
 RETURN_TYPE = "int" | "float" | "double" | "char" | "string"
-PALABRAS_RESERVADAS = "auto" | "break" | "case" | "char" | "const" | "continue" | "default" | "do" | "double" | 
-                      "else" | "enum" | "extern" | "float" | "for" | "goto" | "if" | "int" | "long" | "register" |
-                      "return" | "short" | "signed" | "sizeof" | "static" | "struct" | "switch" | "typedef" | "union" |
-                      "unsigned" | "void" | "volatile" | "while"
-OPERADORES = "," | ";" | "?" | "||" | "&&" | "(" | ")" | "[" | "]" | "{" | "}" | ":" | "." | "++" | "--" | "~" | "#" |
-             ( "*" | "+" | "-" | "/" | "!" | "=" | "<" | ">" | "%" | "&" |"^" | "|" | "<<" | ">>" | "-" ){0,1}={0,1}
+
+PALABRAS_RESERVADAS = "break" | "case" | "char" | "const" | "continue" | "default" | "do" | 
+                      "else" | "for" | "if" | "int" | "long" | "return" | "short" |"switch" | "void" | "while"
+
+OPERADORES = "||" | "&&" | "(" | ")" |
+             "++" | "--" | "%" | "!"
+             ( "*" | "+" | "-" | "/"  | "=" | "<" | ">"  | "|" | "<<" | ">>" | "-" ){0,1}={0,1}
+ 
+
+
 COMENTARIO = {ComentarioNormal} | {ComentariodeLinea} | {ComentarioDocumental}
 ComentarioNormal = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 ComentariodeLinea = "//" {CARACTER}* {FINDELINEA}?
@@ -84,84 +88,130 @@ ContenioComentario = ([^*]|\*+[^/*])*
     /*** OPERADORES ***/
 
     "+"                {    System.out.print(" ADD ");
-                            return symbol(sym.ADD); }
+                            return symbol(sym.ADD,"+"); }
     
     "-"                {    System.out.print(" SUBSTRACT ");
-                            return symbol(sym.SUBSTRACT); }
+                            return symbol(sym.SUBSTRACT,"-"); }
     
     "*"                {    System.out.print(" TIMES ");
-                            return symbol(sym.TIMES); }
+                            return symbol(sym.TIMES,"*"); }
 
     "/"                {    System.out.print(" DIVISION ");
-                            return symbol(sym.DIVISION); }
+                            return symbol(sym.DIVISION,"/"); }
+
+    "%"                {    System.out.print(" MODULUS ");
+                            return symbol(sym.MODULUS,"%"); }
     
+    /*** OPERADORES BINARIOS***/
+    "++"                {   System.out.print("PLUSPLUS");
+                            return symbol(sym.PLUSPLUS,"++"); }
+
+    "--"                {   System.out.print("MINUSMINUS");
+                            return symbol(sym.MINUSMINUS,"--"); }
+
+    "+="                {   System.out.print("PLUSEQ");
+                            return symbol(sym.PLUSEQ,"+="); }
+
+    "-="                {   System.out.print("MINUSEQ");
+                            return symbol(sym.MINUSEQ,"-="); }
+
+    "*="                {   System.out.print("TIMESEQ");
+                            return symbol(sym.TIMESEQ,"*="); }
+
+    "/="                {   System.out.print("DIVEQ");
+                            return symbol(sym.DIVEQ,"/="); }
+
+/*** COMPARADORES ***/
+    "="                 {   System.out.print(" ASSIGN ");
+                            return symbol(sym.ASSIGN,"=");}
+
+    "=="                {   System.out.print(" EQUAL ");
+                            return symbol(sym.EQUAL,"=="); }
+
+    "!="                 {   System.out.print(" NOTEQ ");
+                            return symbol(sym.NOTEQ,"!"); }
+
+    "!"                 {   System.out.print(" EXCLAMACION ");
+                            return symbol(sym.EXCLAMACION,"!"); }
+
+    "<"                 {   System.out.print(" MENORQUE ");
+                            return symbol(sym.MENORQUE,"<"); }
+
+    ">"                 {   System.out.print(" MAYORQUE ");
+                            return symbol(sym.MAYORQUE,">"); }
+
+    "<="                {   System.out.print("MENOREQ");
+                            return symbol(sym.MENOREQ,"<=");}
+    ">="                {   System.out.print("MAYOREQ");
+                            return symbol(sym.MAYOREQ,">=");}
+
 
     /*** SEPARADORES ***/
 
     "("                {    System.out.print(" LPAREN ");
-                            return symbol(sym.LPAREN); }
+                            return symbol(sym.LPAREN,"("); }
     
     ")"                {    System.out.print(" RPAREN ");
-                            return symbol(sym.RPAREN); }
+                            return symbol(sym.RPAREN,")"); }
 
     "{"                {    System.out.print(" LBRACE ");
-                            return symbol(sym.LBRACE); }
+                            return symbol(sym.LBRACE,"{"); }
     
     "}"                {    System.out.print(" RBRACE ");
-                            return symbol(sym.RBRACE); }
+                            return symbol(sym.RBRACE,"}"); }
 
     "["                {    System.out.print(" LBRACK ");
-                            return symbol(sym.LBRACK); }
+                            return symbol(sym.LBRACK,"["); }
 
     "]"                {    System.out.print(" RBRACK ");
-                            return symbol(sym.RBRACK); }
+                            return symbol(sym.RBRACK,"]"); }
 
     ","                {    System.out.print(" COMMA ");
-                            return symbol(sym.COMMA); }
+                            return symbol(sym.COMMA,","); }
 
     "."                {    System.out.print(" DOT ");
-                            return symbol(sym.DOT); }
+                            return symbol(sym.DOT,"."); }
 
     ";"                {    System.out.print(" SEMICOLON ");
-                            return symbol(sym.SEMICOLON); }
+                            return symbol(sym.SEMICOLON,";"); }
+
+    ":"                {    System.out.print(" COL ");
+                            return symbol(sym.COL,":"); }
      
 
     /*** SENTENCIAS ***/
     "if"                {   System.out.print(" IF ");
-                            return symbol(sym.IF); }
+                            return symbol(sym.IF,"if"); }
 
     "else"                {   System.out.print(" ELSE ");
-                            return symbol(sym.ELSE); }
+                            return symbol(sym.ELSE,"else"); }
 
     "while"             {   System.out.print(" WHILE ");
-                            return symbol(sym.WHILE); }
+                            return symbol(sym.WHILE,"while"); }
 
     "do"                {   System.out.print(" DOWHILE ");
-                            return symbol(sym.DO); }
+                            return symbol(sym.DO,"do"); }
 
     "for"               {   System.out.print(" FOR ");
-                            return symbol(sym.FOR); }
+                            return symbol(sym.FOR,"for"); }
 
     "switch"            {   System.out.print(" SWITCH ");
-                            return symbol(sym.SWITCH); }
-       
-    /*** COMPARADORES ***/  
-    "="               {   System.out.print(" EQUAL ");
-                            return symbol(sym.EQUAL); }
+                            return symbol(sym.SWITCH,"switch"); }
 
-    "!"               {   System.out.print(" EXCLAMACION ");
-                            return symbol(sym.EXCLAMACION); }
+    /*** PALABRAS_RESERVADAS ***/
+    "default"           {   System.out.print(" DEFAULT ");
+                            return symbol(sym.DEFAULT,"default"); }
 
-    "<"               {   System.out.print(" MENORQUE ");
-                            return symbol(sym.MENORQUE); }
+    "case"              {   System.out.print(" CASE ");
+                            return symbol(sym.CASE,"case"); }
 
-    ">"               {   System.out.print(" MAYORQUE ");
-                            return symbol(sym.MAYORQUE); }
+    "return"              {   System.out.print(" RETURN ");
+                            return symbol(sym.RETURN,"return"); }
 
 
     /*** TIPOS ***/
-    {RETURN_TYPE}        {   System.out.print(" RETURN_TYPE ");
-                            return symbol(sym.RETURN_TYPE); }
+    {RETURN_TYPE}       {   System.out.print(" RETURN_TYPE ");
+                            return symbol(sym.RETURN_TYPE,yytext()); }
                    
     {NUMERO_ENTERO}     { 
                             System.out.print(" NUMERO_ENTERO "); 
@@ -173,6 +223,6 @@ ContenioComentario = ([^*]|\*+[^/*])*
     {ID}                {   
                             System.out.print(" IDENTIFICADOR "); 
                             lexeme = lexema(IDENTIFICADOR,yytext()); 
-                            return symbol(sym.IDENTIFICADOR);
+                            return symbol(sym.IDENTIFICADOR,yytext());
                         } 
 }
