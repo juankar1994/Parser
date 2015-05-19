@@ -52,7 +52,8 @@ parser code {:
 
 /* OPERADORES */
 terminal            ADD, SUBSTRACT, TIMES, DIVISION, MODULUS;
-terminal            PLUSPLUS, MINUSMINUS, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ, MODEQ;
+terminal            PLUSPLUS, MINUSMINUS;
+terminal            ASSIGN, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ, MODEQ;
 
 /* SEPARADORES */
 terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COL, COMMA, DOT;
@@ -61,10 +62,13 @@ terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, C
 terminal            IF, ELSE, WHILE, DO, FOR, SWITCH;
 
 /* COMPARADORES */
-terminal            ASSIGN, EQUAL, MENORQUE,MENOREQ, MAYORQUE, MAYOREQ, EXCLAMACION, NOTEQ, OR, AND;
+terminal            EQUAL, MENORQUE,MENOREQ, MAYORQUE, MAYOREQ, EXCLAMACION, NOTEQ, OR, AND;
 
 /* PALABRAS RESERVADAS */
 terminal            CASE, DEFAULT, RETURN, CONTINUE, BREAK, VOID;
+
+/* FUNCIONES */
+terminal            READ,WRITE;
 
 /* TIPOS */
 terminal            INT, CHAR, LONG, SHORT, CONST;
@@ -80,7 +84,9 @@ terminal            SIMBOLO_NUMERO, INCLUDE, TEXTO_DIRECTIVA;
 
 
 non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
-non terminal            bloque_global, bloque, lista_sentencias, sentencia;
+non terminal            read_f,write_f, read_f_aux, write_f_aux;
+non terminal            bloque_global, bloque, lista_sentencias, sentencia, expresion;
+non terminal            asignacion, exp_aritmetica,op_asignaciones, exp_booleana, ea1;
 non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement;
 non terminal            condicion, valor;
 non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
@@ -117,10 +123,22 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
 
     bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE ;
 
-    lista_sentencias    ::= lista_sentencias sentencia | sentencia;
+    lista_sentencias    ::= lista_sentencias sentencia | sentencia; ///| expresion SEMICOLON;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
-                            is_constante tipo_dato IDENTIFICADOR declaracion_var |RETURN valor SEMICOLON;
+                            is_constante tipo_dato IDENTIFICADOR declaracion_var | read_f | write_f |RETURN valor SEMICOLON;
+
+    /*expresion           ::= asignacion  | exp_aritmetica  | exp_booleana ;
+    
+    asignacion          ::= IDENTIFICADOR op_asignaciones expresion;
+
+    op_asignaciones     ::= ASSIGN | PLUSEQ | MINUSEQ | TIMESEQ | DIVEQ | MODEQ;
+
+    exp_aritmetica      ::= LPAREN exp_aritmetica RPAREN ea1 | valor ea1 ;
+
+    ea1                 ::= operador exp_aritmetica ea1 | ;
+
+    exp_booleana        ::= condicion | LPAREN exp_booleana RPAREN;*/
 
     if_statement        ::= IF LPAREN condicion RPAREN bloque_global else_statement 
                             |
@@ -129,17 +147,7 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
     /*PONER TODOS LOS LITERALES*/
     valor               ::= IDENTIFICADOR | LITERAL_ENTERO | LITERAL_CARACTER | SUBSTRACT LITERAL_ENTERO;
                                     
-    condicion           ::= valor EQUAL valor condicion_2
-                            |   
-                            valor MENORQUE valor condicion_2
-                            |   
-                            valor MAYORQUE valor condicion_2
-                            |   
-                            valor MAYOREQ valor condicion_2
-                            |   
-                            valor MENOREQ valor condicion_2
-                            |   
-                            valor NOTEQ valor condicion_2
+    condicion           ::= valor comparador valor condicion_2
                             |
                             valor condicion_2
                             |
@@ -150,6 +158,14 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
     condicion_2         ::= AND condicion | OR condicion |;
 
     else_statement      ::= ELSE bloque_global;
+
+    read_f              ::= READ LPAREN read_f_aux RPAREN SEMICOLON;
+    
+    read_f_aux          ::= IDENTIFICADOR  | ;
+
+    write_f             ::= WRITE LPAREN write_f_aux RPAREN SEMICOLON;
+
+    write_f_aux         ::= write_f_aux COMMA valor | valor; 
 
     while_statement     ::= WHILE LPAREN condicion RPAREN bloque_global;
 
@@ -166,7 +182,7 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
     fin_for             ::= IDENTIFICADOR operacion_bin_1 | IDENTIFICADOR operacion_bin_2 valor | 
                             IDENTIFICADOR ASSIGN IDENTIFICADOR operador valor |;
 
-    comparador          ::= EQUAL | NOTEQ | EXCLAMACION | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE;
+    comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE; // QUITE | EXCLAMACION
 
     operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
 

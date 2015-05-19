@@ -226,6 +226,15 @@ ContenioComentario = ([^*]|\*+[^/*])*
 
     "void"              {   System.out.println(" VOID ");
                             return symbol(sym.VOID,"void"); }
+                            
+    /** FUNCIONES **/
+    "read"              {   System.out.println(" READ ");
+                            return symbol(sym.READ,"read"); }
+    
+    "write"             {   System.out.println(" WRITE ");
+                            return symbol(sym.WRITE,"write"); }
+                            
+                            
     /*** TIPOS ***/
 
 
