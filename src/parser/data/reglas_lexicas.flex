@@ -52,6 +52,7 @@ FINDELINEA = \r|\n|\r\n
 ESPACIO =[ \t\r\n] | {FINDELINEA} | [ \t\f]
 CARACTER = [^\"\r\n]
 CARACTER_C = "'"({CARACTER}|\")"'"
+TEXTO_DIRECTIVA = <{LETRA}* (.{CARACTER})?>
 
 NUMERO_ENTERO = 0 | {DIGITO}{NUMERO}*(u|U)?(l|L)?
 NUMERO_FlOTANTE = (0|({DIGITO}{NUMERO}*))?"."{NUMERO}+(u|U)?(l|L)? | {DIGITO}{NUMERO}*(e|E)"-"?{DIGITO}{NUMERO}*(u|U)?(l|L)?
@@ -81,148 +82,217 @@ ContenioComentario = ([^*]|\*+[^/*])*
 %% //fin de opciones
 /* -------------------- Seccion de reglas lexicas ------------------ */
      
-<YYINITIAL> {
-   
-    {ESPACIO} | {COMENTARIO} {/*Ignorar*/}
-        
+<YYINITIAL> {        
     /*** OPERADORES ***/
 
-    "+"                {    System.out.print(" ADD ");
+    "+"                {    System.out.println(" ADD ");
                             return symbol(sym.ADD,"+"); }
     
-    "-"                {    System.out.print(" SUBSTRACT ");
+    "-"                {    System.out.println(" SUBSTRACT ");
                             return symbol(sym.SUBSTRACT,"-"); }
     
-    "*"                {    System.out.print(" TIMES ");
+    "*"                {    System.out.println(" TIMES ");
                             return symbol(sym.TIMES,"*"); }
 
-    "/"                {    System.out.print(" DIVISION ");
+    "/"                {    System.out.println(" DIVISION ");
                             return symbol(sym.DIVISION,"/"); }
 
-    "%"                {    System.out.print(" MODULUS ");
+    "%"                {    System.out.println(" MODULUS ");
                             return symbol(sym.MODULUS,"%"); }
     
     /*** OPERADORES BINARIOS***/
-    "++"                {   System.out.print("PLUSPLUS");
+    "++"                {   System.out.println("PLUSPLUS");
                             return symbol(sym.PLUSPLUS,"++"); }
 
-    "--"                {   System.out.print("MINUSMINUS");
+    "--"                {   System.out.println("MINUSMINUS");
                             return symbol(sym.MINUSMINUS,"--"); }
 
-    "+="                {   System.out.print("PLUSEQ");
+    "+="                {   System.out.println("PLUSEQ");
                             return symbol(sym.PLUSEQ,"+="); }
 
-    "-="                {   System.out.print("MINUSEQ");
+    "-="                {   System.out.println("MINUSEQ");
                             return symbol(sym.MINUSEQ,"-="); }
 
-    "*="                {   System.out.print("TIMESEQ");
+    "*="                {   System.out.println("TIMESEQ");
                             return symbol(sym.TIMESEQ,"*="); }
 
-    "/="                {   System.out.print("DIVEQ");
+    "/="                {   System.out.println("DIVEQ");
                             return symbol(sym.DIVEQ,"/="); }
 
-/*** COMPARADORES ***/
-    "="                 {   System.out.print(" ASSIGN ");
+    "%="                {   System.out.println("MODEQ");
+                            return symbol(sym.MODEQ,"%="); }
+
+    "&&"                {   System.out.println("&&");
+                            return symbol(sym.AND,"&&"); }
+
+    "||"                {   System.out.println("||");
+                            return symbol(sym.OR,"||"); }
+
+
+    /*** COMPARADORES ***/
+    "="                 {   System.out.println(" ASSIGN ");
                             return symbol(sym.ASSIGN,"=");}
 
-    "=="                {   System.out.print(" EQUAL ");
+    "=="                {   System.out.println(" EQUAL ");
                             return symbol(sym.EQUAL,"=="); }
 
-    "!="                 {   System.out.print(" NOTEQ ");
+    "!="                 {   System.out.println(" NOTEQ ");
                             return symbol(sym.NOTEQ,"!"); }
 
-    "!"                 {   System.out.print(" EXCLAMACION ");
+    "!"                 {   System.out.println(" EXCLAMACION ");
                             return symbol(sym.EXCLAMACION,"!"); }
 
-    "<"                 {   System.out.print(" MENORQUE ");
+    "<"                 {   System.out.println(" MENORQUE ");
                             return symbol(sym.MENORQUE,"<"); }
 
-    ">"                 {   System.out.print(" MAYORQUE ");
+    ">"                 {   System.out.println(" MAYORQUE ");
                             return symbol(sym.MAYORQUE,">"); }
 
-    "<="                {   System.out.print("MENOREQ");
+    "<="                {   System.out.println("MENOREQ");
                             return symbol(sym.MENOREQ,"<=");}
-    ">="                {   System.out.print("MAYOREQ");
+    ">="                {   System.out.println("MAYOREQ");
                             return symbol(sym.MAYOREQ,">=");}
 
 
     /*** SEPARADORES ***/
 
-    "("                {    System.out.print(" LPAREN ");
+    "("                {    System.out.println(" LPAREN ");
                             return symbol(sym.LPAREN,"("); }
     
-    ")"                {    System.out.print(" RPAREN ");
+    ")"                {    System.out.println(" RPAREN ");
                             return symbol(sym.RPAREN,")"); }
 
-    "{"                {    System.out.print(" LBRACE ");
+    "{"                {    System.out.println(" LBRACE ");
                             return symbol(sym.LBRACE,"{"); }
     
-    "}"                {    System.out.print(" RBRACE ");
+    "}"                {    System.out.println(" RBRACE ");
                             return symbol(sym.RBRACE,"}"); }
 
-    "["                {    System.out.print(" LBRACK ");
+    "["                {    System.out.println(" LBRACK ");
                             return symbol(sym.LBRACK,"["); }
 
-    "]"                {    System.out.print(" RBRACK ");
+    "]"                {    System.out.println(" RBRACK ");
                             return symbol(sym.RBRACK,"]"); }
 
-    ","                {    System.out.print(" COMMA ");
+    ","                {    System.out.println(" COMMA ");
                             return symbol(sym.COMMA,","); }
 
-    "."                {    System.out.print(" DOT ");
+    "."                {    System.out.println(" DOT ");
                             return symbol(sym.DOT,"."); }
 
-    ";"                {    System.out.print(" SEMICOLON ");
+    ";"                {    System.out.println(" SEMICOLON ");
                             return symbol(sym.SEMICOLON,";"); }
 
-    ":"                {    System.out.print(" COL ");
+    ":"                {    System.out.println(" COL ");
                             return symbol(sym.COL,":"); }
+    "#"                {    System.out.println(" # ");
+                            return symbol(sym.SIMBOLO_NUMERO,"#"); }
      
 
     /*** SENTENCIAS ***/
-    "if"                {   System.out.print(" IF ");
+    "if"                {   System.out.println(" IF ");
                             return symbol(sym.IF,"if"); }
 
-    "else"                {   System.out.print(" ELSE ");
+    "else"                {   System.out.println(" ELSE ");
                             return symbol(sym.ELSE,"else"); }
 
-    "while"             {   System.out.print(" WHILE ");
+    "while"             {   System.out.println(" WHILE ");
                             return symbol(sym.WHILE,"while"); }
 
-    "do"                {   System.out.print(" DOWHILE ");
+    "do"                {   System.out.println(" DOWHILE ");
                             return symbol(sym.DO,"do"); }
 
-    "for"               {   System.out.print(" FOR ");
+    "for"               {   System.out.println(" FOR ");
                             return symbol(sym.FOR,"for"); }
 
-    "switch"            {   System.out.print(" SWITCH ");
+    "switch"            {   System.out.println(" SWITCH ");
                             return symbol(sym.SWITCH,"switch"); }
 
     /*** PALABRAS_RESERVADAS ***/
-    "default"           {   System.out.print(" DEFAULT ");
+    "default"           {   System.out.println(" DEFAULT ");
                             return symbol(sym.DEFAULT,"default"); }
 
-    "case"              {   System.out.print(" CASE ");
+    "case"              {   System.out.println(" CASE ");
                             return symbol(sym.CASE,"case"); }
 
-    "return"              {   System.out.print(" RETURN ");
+    "return"              {   System.out.println(" RETURN ");
                             return symbol(sym.RETURN,"return"); }
 
+    "break"              {   System.out.println(" BREAK ");
+                            return symbol(sym.BREAK,"break"); }
 
+    "continue"               {   System.out.println(" CONTINUE ");
+                            return symbol(sym.CONTINUE,"continue"); }
+
+    "void"              {   System.out.println(" VOID ");
+                            return symbol(sym.VOID,"void"); }
     /*** TIPOS ***/
-    {RETURN_TYPE}       {   System.out.print(" RETURN_TYPE ");
-                            return symbol(sym.RETURN_TYPE,yytext()); }
+
+
+    "char"              {   System.out.println(" CHAR ");
+                            return symbol(sym.CHAR,"char"); }
+
+    "int"               {   System.out.println(" INT ");
+                            return symbol(sym.INT,"int"); }
+
+    "short"             {   System.out.println(" SHORT ");
+                            return symbol(sym.SHORT,"short"); }
+
+    "long"              {   System.out.println(" LONG ");
+                            return symbol(sym.LONG,"long"); }
+
+    "const"             {   System.out.println(" CONST ");
+                            return symbol(sym.CONST,"const"); }
                    
     {NUMERO_ENTERO}     { 
-                            System.out.print(" NUMERO_ENTERO "); 
+                            System.out.println(" NUMERO_ENTERO "); 
                             lexeme= lexema(LITERAL_ENTERO,yytext()); 
                             return symbol(sym.LITERAL_ENTERO, new Integer(yytext()));
                         }
 
+    {CARACTER_C}        { 
+                            System.out.println(" CARACTER_C "); 
+                            lexeme= lexema(LITERAL_CARACTER,yytext()); 
+                            return symbol(sym.LITERAL_CARACTER, yytext());                            
+                        }
+
+    /*** DIRECTIVAS ***/                    
+    "include"           {   System.out.println(" INCLUDE ");
+                            return symbol(sym.INCLUDE,"include"); 
+                        }
+
+    {TEXTO_DIRECTIVA}   {   System.out.println(" TEXTO_DIRECTIVA ");
+                            return symbol(sym.TEXTO_DIRECTIVA,"texto_directiva"); 
+                        }
+
     /*** IDENTIFICADOR ***/
     {ID}                {   
-                            System.out.print(" IDENTIFICADOR "); 
+                            System.out.println(" IDENTIFICADOR "); 
                             lexeme = lexema(IDENTIFICADOR,yytext()); 
                             return symbol(sym.IDENTIFICADOR,yytext());
                         } 
+    
+    {ESPACIO} | {COMENTARIO} {/*Ignorar*/}
+    \" {string = "\""; yybegin(STRING_STATE);}
+    "/*"        {yybegin(COMENTARIO_STATE);}
+    . | 0{NUMERO}* | {DIGITO}({DIGITO}|{LETRA})*  {lexeme = lexema(ERROR); return symbol(sym.error);}
+    <<EOF>> { return symbol(sym.EOF);}
+}
+<STRING_STATE>{
+    {CARACTER}+         { string = string.concat(yytext());} 
+    \"                  {   yybegin(YYINITIAL);string = string.concat(yytext());
+                            System.out.println(" LITERAL STRING ");    
+                            lexeme = lexema(LITERAL_STRING,string); return symbol(sym.LITERAL_STRING);
+                        }
+
+    {FINDELINEA}        {   yybegin(YYINITIAL); string.concat(yytext()); 
+                            lexeme = lexema(ERROR,string); return symbol(sym.error);
+                        }
+    <<EOF>>             {   yybegin(YYINITIAL); string.concat(yytext()); 
+                            lexeme = lexema(ERROR,string); return symbol(sym.error);
+                        }
+}
+<COMENTARIO_STATE>{
+    [^*] {/*Ignorar*/}
+    <<EOF>> { yybegin(YYINITIAL); lexeme = lexema(ERROR,yytext()); return symbol(sym.error);}
 }

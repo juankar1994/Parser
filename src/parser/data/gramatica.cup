@@ -36,9 +36,9 @@ parser code {:
        de simbolos correspondiente. */
     public static void main(String[] args){
         try {
-            Parser asin = new Parser(
+            Parser p = new Parser(
                     new Lexer( new FileReader(args[0])));
-            Object result = asin.parse().value;
+            Object result = p.parse().value;
             System.out.println("\n*** Resultados finales ***");
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -52,7 +52,7 @@ parser code {:
 
 /* OPERADORES */
 terminal            ADD, SUBSTRACT, TIMES, DIVISION, MODULUS;
-terminal            PLUSPLUS, MINUSMINUS, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ;
+terminal            PLUSPLUS, MINUSMINUS, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ, MODEQ;
 
 /* SEPARADORES */
 terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COL, COMMA, DOT;
@@ -61,37 +61,57 @@ terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, C
 terminal            IF, ELSE, WHILE, DO, FOR, SWITCH;
 
 /* COMPARADORES */
-terminal            ASSIGN, EQUAL, MENORQUE,MENOREQ, MAYORQUE, MAYOREQ, EXCLAMACION, NOTEQ;
+terminal            ASSIGN, EQUAL, MENORQUE,MENOREQ, MAYORQUE, MAYOREQ, EXCLAMACION, NOTEQ, OR, AND;
 
 /* PALABRAS RESERVADAS */
-terminal            CASE, DEFAULT, RETURN;
+terminal            CASE, DEFAULT, RETURN, CONTINUE, BREAK, VOID;
 
 /* TIPOS */
-terminal            RETURN_TYPE;
+terminal            INT, CHAR, LONG, SHORT, CONST;
+terminal Integer    LITERAL_ENTERO;
+terminal            LITERAL_CARACTER;
+terminal String     LITERAL_STRING;
 
 /* IDENTIFICADOR */
 terminal            IDENTIFICADOR;
 
-terminal Integer    LITERAL_ENTERO;
+/* DIRECTIVAS */
+terminal            SIMBOLO_NUMERO, INCLUDE, TEXTO_DIRECTIVA;
 
-non terminal            programa , def_funcion , funcion , lista_parametros , parametro;
+
+non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia;
 non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement;
 non terminal            condicion, valor;
 non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
-   
+non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_fase1, long_stmt_fase2, declaracion_var, lista_ids;
+non terminal            validar_int, validar_char, directiva, contenido_directiva, decision_funcion, decision_operacion, validar_expr;
+non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for, validar_expr_2;
+non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2, is_constante;
+
 /* ------------------- Seccion de la gramatica ------------------------ */
    
-    programa            ::= programa def_funcion | programa funcion |;
+    inicio              ::= programa_c;
 
-    def_funcion         ::= RETURN_TYPE IDENTIFICADOR LPAREN lista_parametros RPAREN SEMICOLON;
+    programa_c          ::=  VOID IDENTIFICADOR decision_funcion programa_c |
+                            is_constante tipo_dato IDENTIFICADOR decision_operacion programa_c |
+                            directiva programa_c |;
+
+    decision_funcion    ::= def_funcion | funcion;
+
+    decision_operacion   ::= def_funcion | funcion | declaracion_var;
+
+    directiva           ::= SIMBOLO_NUMERO INCLUDE contenido_directiva;
+
+    contenido_directiva ::= LITERAL_STRING | TEXTO_DIRECTIVA;
+
+    def_funcion         ::= LPAREN lista_parametros RPAREN SEMICOLON;
     
-    funcion             ::= RETURN_TYPE IDENTIFICADOR:i LPAREN lista_parametros RPAREN bloque
-                        {: System.out.println("id= "+i); :};
+    funcion             ::= LPAREN lista_parametros RPAREN bloque;
 
     lista_parametros    ::= lista_parametros COMMA parametro | parametro |;
 
-    parametro           ::= RETURN_TYPE IDENTIFICADOR;
+    parametro           ::= tipo_dato IDENTIFICADOR;
 
     bloque_global       ::= bloque;
 
@@ -99,42 +119,62 @@ non terminal            switch_stmt, case_body, lista_case, case_stmt, default_s
 
     lista_sentencias    ::= lista_sentencias sentencia | sentencia;
 
-    sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | RETURN valor SEMICOLON;
+    sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
+                            is_constante tipo_dato IDENTIFICADOR declaracion_var |RETURN valor SEMICOLON;
 
-/*
-    sentencia           ::= if_statement | while_statement | dowhile_statement | 
-                            for_statement | switch_stmt;
-*/
-    if_statement        ::= IF condicion bloque_global else_statement 
+    if_statement        ::= IF LPAREN condicion RPAREN bloque_global else_statement 
                             |
                             IF condicion bloque_global;
 
     /*PONER TODOS LOS LITERALES*/
-    valor               ::= IDENTIFICADOR | LITERAL_ENTERO;
+    valor               ::= IDENTIFICADOR | LITERAL_ENTERO | LITERAL_CARACTER | SUBSTRACT LITERAL_ENTERO;
                                     
-    condicion           ::= LPAREN valor EQUAL valor RPAREN
+    condicion           ::= valor EQUAL valor condicion_2
                             |   
-                            LPAREN valor MENORQUE valor RPAREN
+                            valor MENORQUE valor condicion_2
                             |   
-                            LPAREN valor MAYORQUE valor RPAREN
+                            valor MAYORQUE valor condicion_2
                             |   
-                            LPAREN valor MAYOREQ valor RPAREN
+                            valor MAYOREQ valor condicion_2
                             |   
-                            LPAREN valor MENOREQ valor RPAREN
+                            valor MENOREQ valor condicion_2
                             |   
-                            LPAREN valor NOTEQ valor RPAREN
+                            valor NOTEQ valor condicion_2
                             |
-                            LPAREN valor RPAREN
+                            valor condicion_2
                             |
-                            LPAREN error:e RPAREN 
+                            error:e
                             {: 
                             :};
+    
+    condicion_2         ::= AND condicion | OR condicion |;
 
     else_statement      ::= ELSE bloque_global;
 
-    while_statement     ::= WHILE condicion bloque_global;
+    while_statement     ::= WHILE LPAREN condicion RPAREN bloque_global;
 
     dowhile_statement   ::= DO bloque_global WHILE LPAREN condicion RPAREN SEMICOLON;
+
+    for_statement       ::= FOR LPAREN condicion_for RPAREN tipo_for;
+
+    condicion_for       ::= inicio_for SEMICOLON medio_for SEMICOLON fin_for;
+    
+    inicio_for          ::= IDENTIFICADOR ASSIGN valor | ;
+
+    medio_for           ::= IDENTIFICADOR comparador valor | ;
+
+    fin_for             ::= IDENTIFICADOR operacion_bin_1 | IDENTIFICADOR operacion_bin_2 valor | 
+                            IDENTIFICADOR ASSIGN IDENTIFICADOR operador valor |;
+
+    comparador          ::= EQUAL | NOTEQ | EXCLAMACION | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE;
+
+    operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
+
+    operacion_bin_1     ::= PLUSPLUS | MINUSMINUS;
+
+    operacion_bin_2     ::= MINUSEQ | TIMESEQ | PLUSEQ | DIVEQ | MODEQ;
+
+    tipo_for            ::= bloque | SEMICOLON;
 
     switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE; 
     
@@ -145,5 +185,23 @@ non terminal            switch_stmt, case_body, lista_case, case_stmt, default_s
     case_stmt           ::= CASE valor COL sentencia | CASE valor COL LPAREN lista_sentencias RPAREN;
     
     default_stmt        ::= DEFAULT COL sentencia | DEFAULT COL LPAREN lista_sentencias RPAREN;
-
     
+    tipo_dato           ::= INT | CHAR | short_stmt | long_stmt;
+
+    declaracion_var     ::= is_constante lista_ids SEMICOLON;
+
+    is_constante        ::= CONST | ;
+    
+    lista_ids           ::= IDENTIFICADOR validar_expr |  lista_ids COMMA IDENTIFICADOR validar_expr | validar_expr;
+
+    short_stmt          ::= SHORT | SHORT INT;
+
+    long_stmt           ::= LONG long_stmt_fase1;
+
+    long_stmt_fase1     ::= INT | LONG long_stmt_fase2 | ;
+
+    long_stmt_fase2     ::= INT |;
+
+    validar_expr        ::= ASSIGN validar_expr_2 |;
+
+    validar_expr_2      ::= LITERAL_ENTERO | LITERAL_CARACTER;
