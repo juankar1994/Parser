@@ -86,14 +86,18 @@ terminal            SIMBOLO_NUMERO, INCLUDE, TEXTO_DIRECTIVA;
 non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
 non terminal            read_f,write_f, read_f_aux, write_f_aux;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia, expresion;
-non terminal            asignacion, exp_aritmetica,op_asignaciones, exp_booleana, ea1;
-non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement;
+non terminal            asignacion, exp, op_asignaciones, exp_aux, call_function, call_function_aux;
+non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement, break_stmt, continue_stmt, return_stmt;
 non terminal            condicion, valor;
 non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
-non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_fase1, long_stmt_fase2, declaracion_var, lista_ids;
+non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_aux, declaracion_var, lista_ids;
 non terminal            validar_int, validar_char, directiva, contenido_directiva, decision_funcion, decision_operacion, validar_expr;
 non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for, validar_expr_2;
 non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2, is_constante;
+
+precedence left OR, AND;
+precedence left ADD, SUBSTRACT;
+precedence left TIMES, DIVISION, MODULUS;
 
 /* ------------------- Seccion de la gramatica ------------------------ */
    
@@ -123,30 +127,29 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
 
     bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE ;
 
-    lista_sentencias    ::= lista_sentencias sentencia | sentencia; ///| expresion SEMICOLON;
+    lista_sentencias    ::= lista_sentencias sentencia | sentencia ;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
-                            is_constante tipo_dato IDENTIFICADOR declaracion_var | read_f | write_f |RETURN valor SEMICOLON;
-
-    /*expresion           ::= asignacion  | exp_aritmetica  | exp_booleana ;
+                            is_constante tipo_dato IDENTIFICADOR declaracion_var | read_f | write_f |expresion SEMICOLON     
+                            | asignacion SEMICOLON | break_stmt | continue_stmt | return_stmt ;
+ 
+    expresion           ::=  exp | call_function;
     
-    asignacion          ::= IDENTIFICADOR op_asignaciones expresion;
+    asignacion          ::= IDENTIFICADOR op_asignaciones exp;
 
-    op_asignaciones     ::= ASSIGN | PLUSEQ | MINUSEQ | TIMESEQ | DIVEQ | MODEQ;
+    op_asignaciones     ::= ASSIGN | operacion_bin_2;
 
-    exp_aritmetica      ::= LPAREN exp_aritmetica RPAREN ea1 | valor ea1 ;
+    exp                 ::= exp_aux operador expresion |exp_aux comparador expresion | LPAREN expresion RPAREN
+                            | exp_aux ;
+    exp_aux             ::= valor ;
+    
 
-    ea1                 ::= operador exp_aritmetica ea1 | ;
-
-    exp_booleana        ::= condicion | LPAREN exp_booleana RPAREN;*/
-
-    if_statement        ::= IF LPAREN condicion RPAREN bloque_global else_statement 
-                            |
-                            IF condicion bloque_global;
+    call_function       ::= IDENTIFICADOR LPAREN call_function_aux RPAREN;
+    
+    call_function_aux   ::= call_function_aux COMMA expresion |  expresion |;
 
     /*PONER TODOS LOS LITERALES*/
-    valor               ::= IDENTIFICADOR | LITERAL_ENTERO | LITERAL_CARACTER | SUBSTRACT LITERAL_ENTERO;
-                                    
+            
     condicion           ::= valor comparador valor condicion_2
                             |
                             valor condicion_2
@@ -157,7 +160,7 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
     
     condicion_2         ::= AND condicion | OR condicion |;
 
-    else_statement      ::= ELSE bloque_global;
+
 
     read_f              ::= READ LPAREN read_f_aux RPAREN SEMICOLON;
     
@@ -165,7 +168,13 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
 
     write_f             ::= WRITE LPAREN write_f_aux RPAREN SEMICOLON;
 
-    write_f_aux         ::= write_f_aux COMMA valor | valor; 
+    write_f_aux         ::= write_f_aux COMMA expresion | expresion; 
+        
+    if_statement        ::= IF LPAREN condicion RPAREN bloque_global else_statement 
+                            |
+                            IF condicion bloque_global;
+
+    else_statement      ::= ELSE bloque_global;
 
     while_statement     ::= WHILE LPAREN condicion RPAREN bloque_global;
 
@@ -175,33 +184,29 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
 
     condicion_for       ::= inicio_for SEMICOLON medio_for SEMICOLON fin_for;
     
-    inicio_for          ::= IDENTIFICADOR ASSIGN valor | ;
+    inicio_for          ::= IDENTIFICADOR asignacion valor | ;
 
     medio_for           ::= IDENTIFICADOR comparador valor | ;
 
     fin_for             ::= IDENTIFICADOR operacion_bin_1 | IDENTIFICADOR operacion_bin_2 valor | 
                             IDENTIFICADOR ASSIGN IDENTIFICADOR operador valor |;
 
-    comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE; // QUITE | EXCLAMACION
-
-    operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
-
-    operacion_bin_1     ::= PLUSPLUS | MINUSMINUS;
-
-    operacion_bin_2     ::= MINUSEQ | TIMESEQ | PLUSEQ | DIVEQ | MODEQ;
-
-    tipo_for            ::= bloque | SEMICOLON;
-
     switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE; 
     
     case_body           ::= lista_case | lista_case default_stmt;
     
-    lista_case          ::= case_stmt | lista_case case_stmt;
+    lista_case          ::= case_stmt | case_stmt break_stmt | lista_case case_stmt;
     
     case_stmt           ::= CASE valor COL sentencia | CASE valor COL LPAREN lista_sentencias RPAREN;
     
     default_stmt        ::= DEFAULT COL sentencia | DEFAULT COL LPAREN lista_sentencias RPAREN;
+       
+    break_stmt         ::= BREAK SEMICOLON;
+
+    continue_stmt      ::= CONTINUE SEMICOLON;
     
+    return_stmt         ::= RETURN expresion SEMICOLON;
+
     tipo_dato           ::= INT | CHAR | short_stmt | long_stmt;
 
     declaracion_var     ::= is_constante lista_ids SEMICOLON;
@@ -212,12 +217,20 @@ non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, 
 
     short_stmt          ::= SHORT | SHORT INT;
 
-    long_stmt           ::= LONG long_stmt_fase1;
+    long_stmt           ::= LONG LONG long_stmt_aux | LONG long_stmt_aux;
 
-    long_stmt_fase1     ::= INT | LONG long_stmt_fase2 | ;
-
-    long_stmt_fase2     ::= INT |;
+    long_stmt_aux       ::= INT | ;
 
     validar_expr        ::= ASSIGN validar_expr_2 |;
 
     validar_expr_2      ::= LITERAL_ENTERO | LITERAL_CARACTER;
+    
+    comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE; // QUITE | EXCLAMACION
+
+    operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
+
+    operacion_bin_1     ::= PLUSPLUS | MINUSMINUS;
+
+    operacion_bin_2     ::= MINUSEQ | TIMESEQ | PLUSEQ | DIVEQ | MODEQ;
+
+    valor               ::= IDENTIFICADOR | LITERAL_ENTERO | LITERAL_CARACTER | SUBSTRACT LITERAL_ENTERO;

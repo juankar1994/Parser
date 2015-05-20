@@ -1,0 +1,20 @@
+LISTO*****Se agregaran dos funciones: read y write. La primera puede o no tener un parámetro y la segunda siempre
+tendrá al menos un parámetro. El parámetro de la primera debe ser un identificador, y el del write puede
+ser cualquier expresión. *****
+
+
+Se debe permitir una lista de variables de un tipo.
+
+LISTO*************En el cuerpo de una función puede venir expresiones, o estructuras de control, instrucciones como read,write, break, continue
+
+Las expresiones pueden ser asignaciones, expresiones aritméticas o booleanas o literales. En el caso de
+las estructuras de control if, for y while en su expresión no deben validar que sea booleana, puede ser
+cualquier tipo de expresión incluso una asignación. En el caso de switch debe validar que la expresión es
+numérica.
+
+Se deben implementar buenos mensajes de error
+
+*******************************************
+AGREGUE BRAKE Y CONTINUE
+LLAMADAS A FUNCIONES AGREGADO
+*******************************************

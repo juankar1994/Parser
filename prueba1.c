@@ -1,13 +1,6 @@
-#include <stdio.h>
- 
-main()
-{
-   int x = 1;
- 
-   if ( x == 1 )
-      printf("x is equal to one.\n");
-   else
-      printf("For comparison use == as = is the assignment operator.\n");
- 
-   return 0;
+int a () {
+	int b;
+	f();
+	b = 1 + 2 * (6 / w(1,a=1));
+	return a;
 }
