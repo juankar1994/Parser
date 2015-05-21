@@ -56,7 +56,7 @@ terminal            PLUSPLUS, MINUSMINUS;
 terminal            ASSIGN, PLUSEQ, MINUSEQ, TIMESEQ, DIVEQ, MODEQ;
 
 /* SEPARADORES */
-terminal            LPAREN, RPAREN, LBRACE, RBRACE, LBRACK, RBRACK, SEMICOLON, COL, COMMA, DOT;
+terminal            LPAREN, RPAREN, LBRACE, RBRACE, SEMICOLON, COLON, COMMA;
 
 /* SENTENCIAS */
 terminal            IF, ELSE, WHILE, DO, FOR, SWITCH;
@@ -84,15 +84,15 @@ terminal            SIMBOLO_NUMERO, INCLUDE, TEXTO_DIRECTIVA;
 
 
 non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
-non terminal            read_f,write_f, read_f_aux, write_f_aux;
+non terminal            read_f,write_f, write_f_aux;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia, expresion;
-non terminal            asignacion, exp, op_asignaciones, exp_aux, call_function, call_function_aux;
+non terminal            asignacion, exp, op_asignaciones, call_function, call_function_aux;
 non terminal            if_statement, while_statement, dowhile_statement, for_statement, else_statement, break_stmt, continue_stmt, return_stmt;
 non terminal            condicion, valor;
 non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
 non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_aux, declaracion_var, lista_ids;
-non terminal            validar_int, validar_char, directiva, contenido_directiva, decision_funcion, decision_operacion, validar_expr;
-non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for, validar_expr_2;
+non terminal            directiva, contenido_directiva, decision_funcion, decision_operacion, validar_expr;
+non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for;
 non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2, is_constante;
 
 precedence left OR, AND;
@@ -130,41 +130,32 @@ precedence left TIMES, DIVISION, MODULUS;
     lista_sentencias    ::= lista_sentencias sentencia | sentencia ;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
-                            is_constante tipo_dato IDENTIFICADOR declaracion_var | read_f | write_f |expresion SEMICOLON     
+                            is_constante tipo_dato IDENTIFICADOR declaracion_var | expresion SEMICOLON     
                             | asignacion SEMICOLON | break_stmt | continue_stmt | return_stmt ;
  
-    expresion           ::=  exp | call_function;
+    expresion           ::=  exp | EXCLAMACION exp | call_function;
     
     asignacion          ::= IDENTIFICADOR op_asignaciones exp;
 
     op_asignaciones     ::= ASSIGN | operacion_bin_2;
 
-    exp                 ::= exp_aux operador expresion |exp_aux comparador expresion | LPAREN expresion RPAREN
-                            | exp_aux ;
-    exp_aux             ::= valor ;
+    exp                 ::= valor operador expresion |valor comparador expresion | LPAREN expresion RPAREN
+                            | valor;
+    call_function       ::= IDENTIFICADOR LPAREN call_function_aux RPAREN | IDENTIFICADOR LPAREN RPAREN | read_f | write_f ;
     
-
-    call_function       ::= IDENTIFICADOR LPAREN call_function_aux RPAREN;
-    
-    call_function_aux   ::= call_function_aux COMMA expresion |  expresion |;
+    call_function_aux   ::= call_function_aux COMMA expresion |  expresion;
 
     /*PONER TODOS LOS LITERALES*/
             
-    condicion           ::= valor comparador valor condicion_2
-                            |
-                            valor condicion_2
+    condicion           ::= condicion_2 AND condicion | condicion_2 OR condicion | condicion_2
                             |
                             error:e
                             {: 
                             :};
-    
-    condicion_2         ::= AND condicion | OR condicion |;
 
+    condicion_2         ::= expresion;
 
-
-    read_f              ::= READ LPAREN read_f_aux RPAREN SEMICOLON;
-    
-    read_f_aux          ::= IDENTIFICADOR  | ;
+    read_f              ::= READ LPAREN IDENTIFICADOR RPAREN SEMICOLON | READ LPAREN RPAREN SEMICOLON;
 
     write_f             ::= WRITE LPAREN write_f_aux RPAREN SEMICOLON;
 
@@ -172,7 +163,7 @@ precedence left TIMES, DIVISION, MODULUS;
         
     if_statement        ::= IF LPAREN condicion RPAREN bloque_global else_statement 
                             |
-                            IF condicion bloque_global;
+                            IF LPAREN condicion RPAREN bloque_global;
 
     else_statement      ::= ELSE bloque_global;
 
@@ -182,9 +173,9 @@ precedence left TIMES, DIVISION, MODULUS;
 
     for_statement       ::= FOR LPAREN condicion_for RPAREN tipo_for;
 
-    condicion_for       ::= inicio_for SEMICOLON medio_for SEMICOLON fin_for;
+    condicion_for       ::= inicio_for SEMICOLON medio_for SEMICOLON fin_for ;
     
-    inicio_for          ::= IDENTIFICADOR asignacion valor | ;
+    inicio_for          ::= asignacion | ;
 
     medio_for           ::= IDENTIFICADOR comparador valor | ;
 
@@ -197,9 +188,9 @@ precedence left TIMES, DIVISION, MODULUS;
     
     lista_case          ::= case_stmt | case_stmt break_stmt | lista_case case_stmt;
     
-    case_stmt           ::= CASE valor COL sentencia | CASE valor COL LPAREN lista_sentencias RPAREN;
+    case_stmt           ::= CASE valor COLON sentencia | CASE valor COLON LPAREN lista_sentencias RPAREN;
     
-    default_stmt        ::= DEFAULT COL sentencia | DEFAULT COL LPAREN lista_sentencias RPAREN;
+    default_stmt        ::= DEFAULT COLON sentencia | DEFAULT COLON LPAREN lista_sentencias RPAREN;
        
     break_stmt         ::= BREAK SEMICOLON;
 
@@ -209,9 +200,7 @@ precedence left TIMES, DIVISION, MODULUS;
 
     tipo_dato           ::= INT | CHAR | short_stmt | long_stmt;
 
-    declaracion_var     ::= is_constante lista_ids SEMICOLON;
-
-    is_constante        ::= CONST | ;
+    declaracion_var     ::= CONST lista_ids SEMICOLON | lista_ids SEMICOLON;
     
     lista_ids           ::= IDENTIFICADOR validar_expr |  lista_ids COMMA IDENTIFICADOR validar_expr | validar_expr;
 
@@ -221,11 +210,9 @@ precedence left TIMES, DIVISION, MODULUS;
 
     long_stmt_aux       ::= INT | ;
 
-    validar_expr        ::= ASSIGN validar_expr_2 |;
-
-    validar_expr_2      ::= LITERAL_ENTERO | LITERAL_CARACTER;
+    validar_expr        ::= ASSIGN expresion |;
     
-    comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE; // QUITE | EXCLAMACION
+    comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE;
 
     operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
 

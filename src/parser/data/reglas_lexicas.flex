@@ -168,23 +168,14 @@ ContenioComentario = ([^*]|\*+[^/*])*
     "}"                {    System.out.println(" RBRACE ");
                             return symbol(sym.RBRACE,"}"); }
 
-    "["                {    System.out.println(" LBRACK ");
-                            return symbol(sym.LBRACK,"["); }
-
-    "]"                {    System.out.println(" RBRACK ");
-                            return symbol(sym.RBRACK,"]"); }
-
     ","                {    System.out.println(" COMMA ");
                             return symbol(sym.COMMA,","); }
-
-    "."                {    System.out.println(" DOT ");
-                            return symbol(sym.DOT,"."); }
 
     ";"                {    System.out.println(" SEMICOLON ");
                             return symbol(sym.SEMICOLON,";"); }
 
-    ":"                {    System.out.println(" COL ");
-                            return symbol(sym.COL,":"); }
+    ":"                {    System.out.println(" COLON ");
+                            return symbol(sym.COLON,":"); }
     "#"                {    System.out.println(" # ");
                             return symbol(sym.SIMBOLO_NUMERO,"#"); }
      
