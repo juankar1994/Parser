@@ -3,11 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/Parser/src/parser/data/reglas_lexicas.flex</file>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/Parser/src/parser/data/sym.java</file>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/Parser/src/parser/data/gramatica.cup</file>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/Parser/src/parser/data/Lexer.java</file>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/Parser/src/parser/view/LexerGUI.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/view/LexerGUI.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/lexer.flex</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/Lexer.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/ArchivoData.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/principal/ParserPrincipal.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/gramatica.cup</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/reglas_lexicas.flex</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/sym.java</file>
+            <file>file:/C:/Users/Brandon/Documents/GitHub/Parser/src/parser/data/Token.java</file>
         </group>
     </open-files>
 </project-private>

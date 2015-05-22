@@ -176,8 +176,6 @@ ContenioComentario = ([^*]|\*+[^/*])*
 
     ":"                {    System.out.println(" COLON ");
                             return symbol(sym.COLON,":"); }
-    "#"                {    System.out.println(" # ");
-                            return symbol(sym.SIMBOLO_NUMERO,"#"); }
      
 
     /*** SENTENCIAS ***/
@@ -254,15 +252,6 @@ ContenioComentario = ([^*]|\*+[^/*])*
                             System.out.println(" CARACTER_C "); 
                             lexeme= lexema(LITERAL_CARACTER,yytext()); 
                             return symbol(sym.LITERAL_CARACTER, yytext());                            
-                        }
-
-    /*** DIRECTIVAS ***/                    
-    "include"           {   System.out.println(" INCLUDE ");
-                            return symbol(sym.INCLUDE,"include"); 
-                        }
-
-    {TEXTO_DIRECTIVA}   {   System.out.println(" TEXTO_DIRECTIVA ");
-                            return symbol(sym.TEXTO_DIRECTIVA,"texto_directiva"); 
                         }
 
     /*** IDENTIFICADOR ***/

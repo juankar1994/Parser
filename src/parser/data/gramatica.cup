@@ -79,10 +79,6 @@ terminal String     LITERAL_STRING;
 /* IDENTIFICADOR */
 terminal            IDENTIFICADOR;
 
-/* DIRECTIVAS */
-terminal            SIMBOLO_NUMERO, INCLUDE, TEXTO_DIRECTIVA;
-
-
 non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
 non terminal            read_f,write_f, write_f_aux;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia, expresion;
@@ -91,7 +87,7 @@ non terminal            if_statement, while_statement, dowhile_statement, for_st
 non terminal            condicion, valor;
 non terminal            switch_stmt, case_body, lista_case, case_stmt, default_stmt;
 non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_aux, declaracion_var, lista_ids;
-non terminal            directiva, contenido_directiva, decision_funcion, decision_operacion, validar_expr;
+non terminal            decision_funcion, decision_operacion, validar_expr;
 non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for;
 non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2, is_constante;
 
@@ -104,16 +100,11 @@ precedence left TIMES, DIVISION, MODULUS;
     inicio              ::= programa_c;
 
     programa_c          ::=  VOID IDENTIFICADOR decision_funcion programa_c |
-                            is_constante tipo_dato IDENTIFICADOR decision_operacion programa_c |
-                            directiva programa_c |;
+                            is_constante tipo_dato IDENTIFICADOR decision_operacion programa_c | ;
 
     decision_funcion    ::= def_funcion | funcion;
 
     decision_operacion   ::= def_funcion | funcion | declaracion_var;
-
-    directiva           ::= SIMBOLO_NUMERO INCLUDE contenido_directiva;
-
-    contenido_directiva ::= LITERAL_STRING | TEXTO_DIRECTIVA;
 
     def_funcion         ::= LPAREN lista_parametros RPAREN SEMICOLON;
     
@@ -145,7 +136,7 @@ precedence left TIMES, DIVISION, MODULUS;
     
     call_function_aux   ::= call_function_aux COMMA expresion |  expresion;
 
-    /*PONER TODOS LOS LITERALES*/
+    is_constante        ::= CONST | ;
             
     condicion           ::= condicion_2 AND condicion | condicion_2 OR condicion | condicion_2
                             |
@@ -200,7 +191,7 @@ precedence left TIMES, DIVISION, MODULUS;
 
     tipo_dato           ::= INT | CHAR | short_stmt | long_stmt;
 
-    declaracion_var     ::= CONST lista_ids SEMICOLON | lista_ids SEMICOLON;
+    declaracion_var     ::= lista_ids SEMICOLON;
     
     lista_ids           ::= IDENTIFICADOR validar_expr |  lista_ids COMMA IDENTIFICADOR validar_expr | validar_expr;
 
