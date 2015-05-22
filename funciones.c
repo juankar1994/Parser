@@ -1,5 +1,3 @@
-#include<stdio.h>
-#include "hola.h"
 int x = 10, y = 20, z = 30;
 char variable = 'a';
 char x1 = 's', x2, x3 = 'a';
