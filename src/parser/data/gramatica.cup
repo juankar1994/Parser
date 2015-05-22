@@ -122,9 +122,9 @@ precedence left TIMES, DIVISION, MODULUS;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
                             is_constante tipo_dato IDENTIFICADOR declaracion_var | expresion SEMICOLON     
-                            | asignacion SEMICOLON | break_stmt | continue_stmt | return_stmt ;
+                            | break_stmt | continue_stmt | return_stmt ;
  
-    expresion           ::=  exp | EXCLAMACION exp | call_function;
+    expresion           ::=  exp | EXCLAMACION exp | call_function | asignacion;
     
     asignacion          ::= IDENTIFICADOR op_asignaciones exp;
 
@@ -146,9 +146,9 @@ precedence left TIMES, DIVISION, MODULUS;
 
     condicion_2         ::= expresion;
 
-    read_f              ::= READ LPAREN IDENTIFICADOR RPAREN SEMICOLON | READ LPAREN RPAREN SEMICOLON;
+    read_f              ::= READ LPAREN IDENTIFICADOR RPAREN | READ LPAREN RPAREN;
 
-    write_f             ::= WRITE LPAREN write_f_aux RPAREN SEMICOLON;
+    write_f             ::= WRITE LPAREN write_f_aux RPAREN;
 
     write_f_aux         ::= write_f_aux COMMA expresion | expresion; 
         
