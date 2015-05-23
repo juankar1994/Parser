@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,11 +19,14 @@ import parser.data.Lexema;
 import parser.data.Lexer;
 import parser.data.Parser;
 import parser.data.Token;
+import parser.data.ErrorData;
+import parser.data.sym;
 
 public class DatosArchivoController {
     
     //Referencia al archivo leído
     ArchivoData archivoData = new ArchivoData();
+    ErrorData errorData;
     
     public void setArchivo(JFileChooser archivoSeleccionado, String comando){
         if(comando.equals(JFileChooser.APPROVE_SELECTION)){
@@ -53,6 +57,10 @@ public class DatosArchivoController {
     }
     
     public void analizarArchivoSintactico() {
+        try{
+            errorData.getErrores().clear();
+        }catch(Exception e){ System.out.print(""); }
+        
         String[] archivo = {archivoData.getArchivo().getAbsolutePath()};
         Parser.main(archivo);
     }
@@ -76,6 +84,24 @@ public class DatosArchivoController {
         
         //Una vez divididos en listas los errores se retorna para crear el Object[][]
         return lexemasTotales;
+    }
+    
+    public String mostrarErroresSintacticos() throws IllegalArgumentException, IllegalAccessException{
+        errorData = ErrorData.getInstance();
+        ArrayList<ErrorData> errores = errorData.getErrores();
+        String msjErrores = "", tituloTexto = "";
+        for (ErrorData error : errores) {
+            Field fld[] = sym.class.getDeclaredFields();
+            for (int i = 0; i < fld.length; i++)
+            {
+                Object value = fld[i].get(fld[i].getName());
+                value = "#" + value;
+                if(value.equals(error.getTitle()))
+                    tituloTexto = fld[i].getName();
+            }   
+            msjErrores += "Error Sintáctico: " + error.getId() + "\n\tMotivo: " + tituloTexto + "  \n\tMensaje: " + error.getMessage() + "\n";
+        }
+        return msjErrores;
     }
     
     public Object[][] getListaTokensErrores(ArrayList<Lexema> lexemas){

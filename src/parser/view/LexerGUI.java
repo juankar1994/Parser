@@ -29,6 +29,7 @@ public class LexerGUI extends javax.swing.JFrame {
         //Centrar pantalla
         setLocationRelativeTo(null);
         archivoTxtArea.setDisabledTextColor(Color.BLACK);
+        parserTxtArea.setDisabledTextColor(Color.BLACK);
         FileFilter filtro = new FileNameExtensionFilter(".c", "c");
         archivofileChooser.setFileFilter(filtro);
         
@@ -265,6 +266,8 @@ public class LexerGUI extends javax.swing.JFrame {
                 
                 
                 archivoController.analizarArchivoSintactico();
+                parserTxtArea.setText(archivoController.mostrarErroresSintacticos());
+                
                 JOptionPane.showMessageDialog(null, "El archivo ha sido analizado.\n", 
                                                 "Advertencia", JOptionPane.INFORMATION_MESSAGE);
                 

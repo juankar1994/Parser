@@ -264,7 +264,7 @@ ContenioComentario = ([^*]|\*+[^/*])*
     {ESPACIO} | {COMENTARIO} {/*Ignorar*/}
     \" {string = "\""; yybegin(STRING_STATE);}
     "/*"        {yybegin(COMENTARIO_STATE);}
-    . | 0{NUMERO}* | {DIGITO}({DIGITO}|{LETRA})*  {lexeme = lexema(ERROR); return symbol(sym.error);}
+    . | 0{NUMERO}* {lexeme = lexema(ERROR); return symbol(sym.error);}
     <<EOF>> { return symbol(sym.EOF);}
 }
 <STRING_STATE>{
