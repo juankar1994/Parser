@@ -14,10 +14,23 @@ parser code {:
     public static ErrorData errorData = ErrorData.getInstance();
     ErrorData detectedError;
     
+    public void unrecovered_syntax_error(Symbol cur_token){
+        if(cur_token.sym == 0){
+            System.out.println("*******************FIN DEL ANALISIS**********************");
+        }
+        else{
+            report_error("Error fatal","");
+        }
+    }
     /* Reporte de error encontrado. */
     public void report_error(String message, Object info) {
         if (info instanceof String){
             errors++;
+            /*try {
+                restart_lookahead();
+            } catch (Exception ex) {
+                Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
             String mensaje = ", se esperaba: " + message;
             try{
                 detectedError.setId(errors);
@@ -40,6 +53,8 @@ parser code {:
             m.append(" : " + message);
             detectedError = new ErrorData(errors, info.toString(), m.toString());
             errorData.insertarError(detectedError);
+            if(info.toString().equals("#" + 0))
+                done_parsing();
         }
     }
    
@@ -127,17 +142,20 @@ precedence left TIMES, DIVISION, MODULUS;
     inicio              ::= programa_c;
 
     programa_c          ::=   tipo_dato declaracion_var programa_c | CONST tipo_dato declaracion_var programa_c
-                            | decision_funcion ;
+                            | decision_funcion;
     
     decision_funcion    ::= tipo_dato IDENTIFICADOR decision_operacion decision_funcion
                             | VOID IDENTIFICADOR decision_operacion decision_funcion 
-                            | VOID error {: parser.report_error(" no se encuentra el ID de la función.","");  :} decision_operacion decision_funcion;
+                            | VOID error {: parser.report_error(" el identificador de la función.","");  :} decision_operacion decision_funcion
+                            | error {: parser.report_error(" tipo de dato de la función.","");  :} IDENTIFICADOR decision_operacion decision_funcion
+                            | error {: parser.report_error(" el identificador de la función.","");  :} decision_operacion decision_funcion;
 
     decision_operacion   ::= def_funcion | funcion;
 
     def_funcion         ::= LPAREN lista_parametros RPAREN SEMICOLON;
     
-    funcion             ::= LPAREN lista_parametros RPAREN bloque_global | LPAREN error {: parser.report_error(" parámetro incorrecto.",""); :} RPAREN bloque_global;
+    funcion             ::= LPAREN lista_parametros RPAREN bloque_global | 
+                            LPAREN error {: parser.report_error(" parámetro incorrecto.",""); :} RPAREN bloque_global;
 
     lista_parametros    ::= lista_parametros COMMA parametro | parametro | ;
 
@@ -148,15 +166,16 @@ precedence left TIMES, DIVISION, MODULUS;
                             | error {: parser.report_error(" no se encuentra el LBRACE .","");  :} programa_c;
                             //| LBRACE declaracion_var_interna lista_sentencias error {: parser.report_error(" no se encuentra el RBRACE .","");  :} programa_c;
 
-    bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE;
+    bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE | 
+                            error {: parser.report_error(" no se encuentra el LBRACE o expresión inválida.","");  :} decision_funcion;
 
     declaracion_var_interna     ::= is_constante tipo_dato declaracion_var declaracion_var_interna | ;
 
     lista_sentencias    ::= lista_sentencias sentencia | sentencia;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
-                            expresion SEMICOLON | break_stmt | continue_stmt | return_stmt | 
-                            error {: parser.report_error(" no se reconoce la expresión.", "");  :} SEMICOLON;
+                            expresion SEMICOLON | break_stmt | continue_stmt | return_stmt |
+                            error {: parser.report_error(" no se reconoce la expresión o falta ; al final.", "");  :} sentencia;
  
     expresion           ::=  exp | EXCLAMACION exp | call_function | asignacion;
     
@@ -176,15 +195,23 @@ precedence left TIMES, DIVISION, MODULUS;
 
     condicion_2         ::= expresion;
 
-    read_f              ::= READ LPAREN IDENTIFICADOR RPAREN | READ LPAREN RPAREN;
+    read_f              ::= READ LPAREN IDENTIFICADOR RPAREN | READ LPAREN RPAREN | 
+                            READ LPAREN error{: parser.report_error(" parámetros incorrectos en el READ.", ""); :} RPAREN;
 
-    write_f             ::= WRITE LPAREN write_f_aux RPAREN;
+    write_f             ::= WRITE LPAREN write_f_aux RPAREN |
+                            WRITE LPAREN error{: parser.report_error(" parámetros incorrectos en el WRITE.", ""); :} RPAREN;
 
     write_f_aux         ::= write_f_aux COMMA expresion | expresion; 
         
     if_statement        ::= IF LPAREN condicion RPAREN bloque else_statement |
                             IF LPAREN 
-                                error {: parser.report_error("una condición valida para el IF.", ""); :} 
+                                error {: parser.report_error(" una condición válida para el IF.", ""); :} 
+                            RPAREN bloque else_statement |
+                            IF LPAREN
+                                    error {: parser.report_error(" un RPAREN al final de la condición del IF.", ""); :} 
+                            bloque| 
+                            IF  
+                                error {: parser.report_error(" un LPAREN al final de la condición del IF.", ""); :} 
                             RPAREN bloque else_statement;
 
     else_statement      ::= ELSE bloque |;
@@ -192,17 +219,35 @@ precedence left TIMES, DIVISION, MODULUS;
     while_statement     ::= WHILE LPAREN condicion RPAREN bloque|
                             WHILE LPAREN
                                 error {: parser.report_error("una condición valida para el WHILE.", ""); :} 
+                            RPAREN bloque|
+                            WHILE LPAREN
+                                error {: parser.report_error(" un RPAREN al final de la condición del WHILE.", ""); :} 
+                            bloque
+                            | WHILE 
+                                error {: parser.report_error(" un LPAREN al final de la condición del WHILE.", ""); :} 
                             RPAREN bloque;
 
     dowhile_statement   ::= DO bloque WHILE LPAREN condicion RPAREN SEMICOLON |
                             DO bloque WHILE LPAREN
-                                error {: parser.report_error("una condición valida para el DOWHILE.", ""); :} 
+                                error {: parser.report_error(" una condición valida para el DO_WHILE.", ""); :} 
+                            RPAREN SEMICOLON|
+                            DO bloque WHILE LPAREN
+                                error {: parser.report_error(" un RPAREN al final de la condición del DO_WHILE.", ""); :} 
+                            SEMICOLON
+                            | DO bloque WHILE 
+                                error {: parser.report_error(" un LPAREN al final de la condición del DO_WHILE.", ""); :} 
                             RPAREN SEMICOLON;
-
+ 
     for_statement       ::= FOR LPAREN condicion_for RPAREN tipo_for |
                             FOR LPAREN 
-                                error {: parser.report_error("una condición valida para el FOR.", ""); :}  
-                            RPAREN tipo_for;
+                                error {: parser.report_error(" una condición valida para el FOR.", ""); :}  
+                            RPAREN tipo_for|
+                            FOR 
+                                error {: parser.report_error(" un LPAREN al final de la condición del FOR.", ""); :}  
+                            RPAREN tipo_for|
+                            FOR LPAREN 
+                                error {: parser.report_error(" un RPAREN al final de la condición del FOR.", ""); :}  
+                             tipo_for;
     
     tipo_for            ::= bloque | SEMICOLON;
 
@@ -218,7 +263,13 @@ precedence left TIMES, DIVISION, MODULUS;
     switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE |
                             SWITCH LPAREN 
                                 error {: parser.report_error("una condición numérica para el SWITCH.", ""); :}  
-                            RPAREN LBRACE case_body RBRACE;
+                            RPAREN LBRACE case_body RBRACE |
+                            SWITCH 
+                                error {: parser.report_error(" un LPAREN al final de la condición del SWITCH.", ""); :}  
+                            RPAREN LBRACE case_body RBRACE|
+                            SWITCH LPAREN
+                                error {: parser.report_error(" un RPAREN al final de la condición del SWITCH.", ""); :}  
+                            LBRACE case_body RBRACE;
     
     case_body           ::= lista_case | lista_case default_stmt |;
     
@@ -241,7 +292,7 @@ precedence left TIMES, DIVISION, MODULUS;
     lista_ids           ::=  IDENTIFICADOR validar_expr | 
                              lista_ids COMMA IDENTIFICADOR validar_expr | 
                              lista_ids IDENTIFICADOR validar_expr |
-                             error{:System.out.println("-------------------3---------------"); parser.report_error(" un ; al final de la expresión.",""); :} programa_c;
+                             error{: parser.report_error(" un ; al final de la expresión.",""); :} programa_c;
 
     short_stmt          ::= SHORT | SHORT INT;
 
@@ -250,7 +301,7 @@ precedence left TIMES, DIVISION, MODULUS;
     long_stmt_aux       ::= INT | ;
 
     validar_expr        ::= ASSIGN expresion
-                            | ASSIGN error {: System.out.println("-------------------1---------------"); parser.report_error(" una expresión.",""); :} programa_c
+                            | ASSIGN error {: parser.report_error(" una expresión o falta ; al final.",""); :} programa_c
                             |;
 
     comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE;

@@ -15,6 +15,7 @@ import static parser.data.Token.*;
 %column
 %public
 %cup
+%eofclose false
 %{
     private Lexema lexema(Token type) {
         return new Lexema(type, yyline, yycolumn);

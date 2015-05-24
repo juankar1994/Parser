@@ -597,18 +597,6 @@ public class Lexer implements java_cup.runtime.Scanner {
 
 
   /**
-   * Contains user EOF-code, which will be executed exactly once,
-   * when the end of file is reached
-   */
-  private void zzDoEOF() throws java.io.IOException {
-    if (!zzEOFDone) {
-      zzEOFDone = true;
-      yyclose();
-    }
-  }
-
-
-  /**
    * Resumes scanning until the next regular expression is matched,
    * the end of input is encountered or an I/O-Error occurs.
    *
@@ -751,7 +739,6 @@ public class Lexer implements java_cup.runtime.Scanner {
 
       if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
         zzAtEOF = true;
-            zzDoEOF();
             switch (zzLexicalState) {
             case YYINITIAL: {
               System.out.println(" EOF ");  return symbol(sym.EOF);

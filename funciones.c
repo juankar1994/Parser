@@ -5,10 +5,36 @@ char variable = 'a';
 char x1 = , x2 = , x3 = 'a';
 const long num1;
 
-void hola(int , b){
+int hola(int a,int b){
+	while(1){
+		read(i);
+		write(1);
+	}
+	if ({
+		//int a;
+	}
+	while (){
 
+	}
+	
+	do{
+
+	}while();
+
+	for(;;){ }
+
+	switch(a){}
 }
 
-void hola2(int a, b){
+void hola2(int a, int b){
+	if(1){
+		//int a;
+	}
+	a = 1;
+}
 
+void hola3(int , b){
+	if(){
+
+	}
 }
