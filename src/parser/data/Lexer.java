@@ -754,7 +754,7 @@ public class Lexer implements java_cup.runtime.Scanner {
             zzDoEOF();
             switch (zzLexicalState) {
             case YYINITIAL: {
-              return symbol(sym.EOF);
+              System.out.println(" EOF ");  return symbol(sym.EOF);
             }
             case 133: break;
             case STRING_STATE: {

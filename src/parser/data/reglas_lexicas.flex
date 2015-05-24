@@ -265,7 +265,7 @@ ContenioComentario = ([^*]|\*+[^/*])*
     \" {string = "\""; yybegin(STRING_STATE);}
     "/*"        {yybegin(COMENTARIO_STATE);}
     . | 0{NUMERO}* {lexeme = lexema(ERROR); return symbol(sym.error);}
-    <<EOF>> { return symbol(sym.EOF);}
+    <<EOF>> { System.out.println(" EOF ");  return symbol(sym.EOF);}
 }
 <STRING_STATE>{
     {CARACTER}+         { string = string.concat(yytext());} 

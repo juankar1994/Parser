@@ -39,6 +39,7 @@ parser code {:
             }
             m.append(" : " + message);
             detectedError = new ErrorData(errors, info.toString(), m.toString());
+            errorData.insertarError(detectedError);
         }
     }
    
@@ -46,8 +47,9 @@ parser code {:
         recuperarse, se lanza un error fatal. Se despliega el mensaje
         de error y se finaliza la ejecucion. */
     public void report_fatal_error(String message, Object info) {
+        System.out.println("----------FUI YO------------");
         report_error(message, info);
-        System.exit(1);
+        //System.exit(1);
     }
 
     /* Metodo main para garantizar la ejecucion del analizador
@@ -100,6 +102,8 @@ terminal String     LITERAL_STRING;
 /* IDENTIFICADOR */
 terminal            IDENTIFICADOR;
 
+/* EOF*/
+
 non terminal            inicio, programa_c , def_funcion , funcion , lista_parametros , parametro;
 non terminal            read_f,write_f, write_f_aux;
 non terminal            bloque_global, bloque, lista_sentencias, sentencia, expresion;
@@ -111,6 +115,7 @@ non terminal            tipo_dato, short_stmt, long_stmt, long_stmt_aux, declara
 non terminal            decision_funcion, decision_operacion, validar_expr, declaracion_var_interna;
 non terminal            condicion_for, tipo_for, inicio_for, medio_for, fin_for;
 non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2, is_constante;
+non terminal            unexpected_assignment, lista_sentencias_aux, expresion_manejo;
 
 precedence left OR, AND;
 precedence left ADD, SUBSTRACT;
@@ -121,32 +126,37 @@ precedence left TIMES, DIVISION, MODULUS;
 
     inicio              ::= programa_c;
 
-    programa_c          ::=  VOID IDENTIFICADOR decision_funcion programa_c |
-                            is_constante tipo_dato IDENTIFICADOR decision_operacion programa_c | ;
+    programa_c          ::=   tipo_dato declaracion_var programa_c | CONST tipo_dato declaracion_var programa_c
+                            | decision_funcion ;
+    
+    decision_funcion    ::= tipo_dato IDENTIFICADOR decision_operacion decision_funcion
+                            | VOID IDENTIFICADOR decision_operacion decision_funcion 
+                            | VOID error {: parser.report_error(" no se encuentra el ID de la función.","");  :} decision_operacion decision_funcion;
 
-    decision_funcion    ::= def_funcion | funcion;
-
-    decision_operacion   ::= def_funcion | funcion | declaracion_var;
+    decision_operacion   ::= def_funcion | funcion;
 
     def_funcion         ::= LPAREN lista_parametros RPAREN SEMICOLON;
     
-    funcion             ::= LPAREN lista_parametros RPAREN bloque_global;
+    funcion             ::= LPAREN lista_parametros RPAREN bloque_global | LPAREN error {: parser.report_error(" parámetro incorrecto.",""); :} RPAREN bloque_global;
 
-    lista_parametros    ::= lista_parametros COMMA parametro | parametro |;
+    lista_parametros    ::= lista_parametros COMMA parametro | parametro | ;
 
     parametro           ::= tipo_dato IDENTIFICADOR;
 
-    bloque_global       ::= LBRACE declaracion_var_interna lista_sentencias RBRACE | LBRACE RBRACE;
+    bloque_global       ::= LBRACE declaracion_var_interna lista_sentencias RBRACE 
+                            | LBRACE RBRACE
+                            | error {: parser.report_error(" no se encuentra el LBRACE .","");  :} programa_c;
+                            //| LBRACE declaracion_var_interna lista_sentencias error {: parser.report_error(" no se encuentra el RBRACE .","");  :} programa_c;
 
     bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE;
 
-    declaracion_var_interna     ::= is_constante tipo_dato IDENTIFICADOR declaracion_var | ;
+    declaracion_var_interna     ::= is_constante tipo_dato declaracion_var declaracion_var_interna | ;
 
-    lista_sentencias    ::= lista_sentencias sentencia | sentencia ;
+    lista_sentencias    ::= lista_sentencias sentencia | sentencia;
 
     sentencia           ::= if_statement |  while_statement | dowhile_statement | switch_stmt | for_statement |
                             expresion SEMICOLON | break_stmt | continue_stmt | return_stmt | 
-                            error {: parser.report_error("no declarar variable aquí.", ""); :};
+                            error {: parser.report_error(" no se reconoce la expresión.", "");  :} SEMICOLON;
  
     expresion           ::=  exp | EXCLAMACION exp | call_function | asignacion;
     
@@ -162,12 +172,7 @@ precedence left TIMES, DIVISION, MODULUS;
 
     is_constante        ::= CONST | ;
             
-    condicion           ::= condicion_2 AND condicion | condicion_2 OR condicion | condicion_2
-                            |
-                            error:e
-                            {: 
-                                parser.report_error("una condición formada por una expresión.", "");
-                            :};
+    condicion           ::= condicion_2 AND condicion | condicion_2 OR condicion | condicion_2;
 
     condicion_2         ::= expresion;
 
@@ -177,17 +182,27 @@ precedence left TIMES, DIVISION, MODULUS;
 
     write_f_aux         ::= write_f_aux COMMA expresion | expresion; 
         
-    if_statement        ::= IF LPAREN condicion RPAREN bloque else_statement 
-                            |
-                            IF LPAREN condicion RPAREN bloque;
+    if_statement        ::= IF LPAREN condicion RPAREN bloque else_statement |
+                            IF LPAREN 
+                                error {: parser.report_error("una condición valida para el IF.", ""); :} 
+                            RPAREN bloque else_statement;
 
-    else_statement      ::= ELSE bloque;
+    else_statement      ::= ELSE bloque |;
 
-    while_statement     ::= WHILE LPAREN condicion RPAREN bloque;
+    while_statement     ::= WHILE LPAREN condicion RPAREN bloque|
+                            WHILE LPAREN
+                                error {: parser.report_error("una condición valida para el WHILE.", ""); :} 
+                            RPAREN bloque;
 
-    dowhile_statement   ::= DO bloque WHILE LPAREN condicion RPAREN SEMICOLON;
+    dowhile_statement   ::= DO bloque WHILE LPAREN condicion RPAREN SEMICOLON |
+                            DO bloque WHILE LPAREN
+                                error {: parser.report_error("una condición valida para el DOWHILE.", ""); :} 
+                            RPAREN SEMICOLON;
 
-    for_statement       ::= FOR LPAREN condicion_for RPAREN tipo_for;
+    for_statement       ::= FOR LPAREN condicion_for RPAREN tipo_for |
+                            FOR LPAREN 
+                                error {: parser.report_error("una condición valida para el FOR.", ""); :}  
+                            RPAREN tipo_for;
     
     tipo_for            ::= bloque | SEMICOLON;
 
@@ -200,9 +215,12 @@ precedence left TIMES, DIVISION, MODULUS;
     fin_for             ::= IDENTIFICADOR operacion_bin_1 | IDENTIFICADOR operacion_bin_2 valor | 
                             IDENTIFICADOR ASSIGN IDENTIFICADOR operador valor |;
 
-    switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE; 
+    switch_stmt         ::= SWITCH LPAREN valor RPAREN LBRACE case_body RBRACE |
+                            SWITCH LPAREN 
+                                error {: parser.report_error("una condición numérica para el SWITCH.", ""); :}  
+                            RPAREN LBRACE case_body RBRACE;
     
-    case_body           ::= lista_case | lista_case default_stmt;
+    case_body           ::= lista_case | lista_case default_stmt |;
     
     lista_case          ::= case_stmt | case_stmt break_stmt | lista_case case_stmt;
     
@@ -218,10 +236,12 @@ precedence left TIMES, DIVISION, MODULUS;
 
     tipo_dato           ::= INT | CHAR | short_stmt | long_stmt;
 
-    declaracion_var     ::= lista_ids SEMICOLON | 
-                            error {: parser.report_error(" ; al final de la declaración.", "");  :};
-    
-    lista_ids           ::= IDENTIFICADOR validar_expr |  lista_ids COMMA IDENTIFICADOR validar_expr | validar_expr;
+    declaracion_var     ::= lista_ids SEMICOLON;
+
+    lista_ids           ::=  IDENTIFICADOR validar_expr | 
+                             lista_ids COMMA IDENTIFICADOR validar_expr | 
+                             lista_ids IDENTIFICADOR validar_expr |
+                             error{:System.out.println("-------------------3---------------"); parser.report_error(" un ; al final de la expresión.",""); :} programa_c;
 
     short_stmt          ::= SHORT | SHORT INT;
 
@@ -229,10 +249,10 @@ precedence left TIMES, DIVISION, MODULUS;
 
     long_stmt_aux       ::= INT | ;
 
-    validar_expr        ::= ASSIGN expresion | 
-                            ASSIGN COMMA error {: parser.report_error("igualar el identificador a una expresión.", "");  :} 
-                            | ;
-    
+    validar_expr        ::= ASSIGN expresion
+                            | ASSIGN error {: System.out.println("-------------------1---------------"); parser.report_error(" una expresión.",""); :} programa_c
+                            |;
+
     comparador          ::= EQUAL | NOTEQ  | MENOREQ | MAYOREQ | MENORQUE | MAYORQUE;
 
     operador            ::= ADD | SUBSTRACT | TIMES | DIVISION | MODULUS;
