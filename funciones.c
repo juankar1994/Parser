@@ -1,6 +1,12 @@
 int a = 12;
-int b;
+int a;
 int a = 20;
+int b;
+int b;
+int b;
+void b();
+
+
 void x();
 
 int x(){

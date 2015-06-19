@@ -2,21 +2,28 @@
 package parser.data;
 
 public class InfoKey {
-    private String categoria;
-    private String tipo;
-    private String valor;
+    private String categoria; 
+    private String tipo;      
+    private String valor;     
+    private int numDeclarado = 0;
 
     public InfoKey(String categoria, String tipo, String valor) {
         this.categoria = categoria;
         this.tipo = tipo;
         this.valor = valor;
+        this.numDeclarado++;
     }
     
     public InfoKey(String categoria, String tipo) {
         this.categoria = categoria;
         this.tipo = tipo;
+        this.numDeclarado++;
     }
 
+    public void sumarDeclarado(){
+        this.numDeclarado++;
+    }
+    
     public String getCategoria() {
         return categoria;
     }
@@ -40,4 +47,12 @@ public class InfoKey {
     public void setValor(String valor) {
         this.valor = valor;
     }
+
+    public int getNumDeclarado() {
+        return numDeclarado;
+    }
+
+    public void setNumDeclarado(int numDeclarado) {
+        this.numDeclarado = numDeclarado;
+    }    
 }

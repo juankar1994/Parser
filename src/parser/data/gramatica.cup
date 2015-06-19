@@ -6,6 +6,7 @@ import java_cup.runtime.*;
 import java.io.FileReader;
 import java.util.Hashtable;
 import java.util.Stack;
+import parser.controller.DatosArchivoController;
    
 /* Codigo del parser, se copia integramente a la clase final.
     Agregamos el manejo de errores. */
@@ -14,19 +15,30 @@ parser code {:
     public static Lexer s;
     public static int errors = 0;
     public static ErrorData errorData = ErrorData.getInstance();
+    public DatosArchivoController archivoController = DatosArchivoController.getInstance();
     ErrorData detectedError;
     public Hashtable<String, InfoKey> tablaSimbolos = new Hashtable<String, InfoKey>();
     public Stack<RegistroSemantico> pilaSemantica = new Stack<>();
     
     /* Reporte de error encontrado. */
+
+    public void report_error(String message,String tipo, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" en la línea "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", columna "+(s.right+1));
+            }
+        }
+        m.append(" : " + message);
+        archivoController.mostrarErroresSemanticos(m.toString());
+
+    }
     public void report_error(String message, Object info) {
         if (info instanceof String){
             errors++;
-            /*try {
-                restart_lookahead();
-            } catch (Exception ex) {
-                Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
-            }*/
             String mensaje = ", se esperaba: " + message;
             try{
                 detectedError.setId(errors);
@@ -131,8 +143,8 @@ precedence left TIMES, DIVISION, MODULUS;
 
     inicio              ::= programa_c;
 
-    programa_c          ::=   declaration_part id_declaration verification_part SEMICOLON 
-                                {:
+    programa_c          ::=   declaration_part id_declaration verification_part SEMICOLON
+                                {: int a = 10;
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
                                     if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){
@@ -145,32 +157,50 @@ precedence left TIMES, DIVISION, MODULUS;
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());    
-                                    }else
-                                        System.out.println("ERROR SEMÁNTICO - VARIABLE YA DECLARADA");
+                                    }else{
+                                        if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
+                                            parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", ""); 
+                                        }
+                                    }
                                 :}  programa_c 
-                            | function_declaration_part id_declaration decision_operacion 
+                            | function_declaration_part id_declaration decision_operacion:s 
                                 {:
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
-                                    parser.tablaSimbolos.put(RS_ID.getToken(), 
-                                                             new InfoKey("Función", 
-                                                                          RS_TIPO.getToken())); 
-                                    System.out.println("DATOS TABLA SIMBOLOS");
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());
+                                    if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){                                    
+                                        parser.tablaSimbolos.put(RS_ID.getToken(), 
+                                                                 new InfoKey("Función", 
+                                                                              RS_TIPO.getToken())); 
+                                        System.out.println("DATOS TABLA SIMBOLOS");
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());
+                                    }else{
+                                        if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
+                                            parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", s); 
+                                        }
+                                    }
                                 :} programa_c 
-                            | declaration_part id_declaration decision_operacion 
+                            | declaration_part id_declaration decision_operacion:s
                                 {:
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
-                                    parser.tablaSimbolos.put(RS_ID.getToken(), 
-                                                             new InfoKey("Función", 
-                                                                          RS_TIPO.getToken())); 
-                                    System.out.println("DATOS TABLA SIMBOLOS");
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
-                                    System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());
+                                    if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){                                    
+                                        parser.tablaSimbolos.put(RS_ID.getToken(), 
+                                                                 new InfoKey("Función", 
+                                                                              RS_TIPO.getToken())); 
+                                        System.out.println("DATOS TABLA SIMBOLOS");
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
+                                        System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());
+                                    }else{
+                                        if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
+                                            parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", s); 
+                                        }
+                                    }
                                 :} programa_c 
                             |;
 

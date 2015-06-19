@@ -21,8 +21,8 @@ import parser.data.Lexema;
 public class LexerGUI extends javax.swing.JFrame {
 
     //Referencia al controlador
-    DatosArchivoController archivoController = new DatosArchivoController();
-    JTable tablaTokens, tablaErrores; 
+    DatosArchivoController archivoController = DatosArchivoController.getInstance();
+    JTable tablaTokens, tablaErrores;
     
     public LexerGUI() {
         initComponents();
@@ -30,6 +30,7 @@ public class LexerGUI extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         archivoTxtArea.setDisabledTextColor(Color.BLACK);
         parserTxtArea.setDisabledTextColor(Color.BLACK);
+        semanticoTxtArea.setDisabledTextColor(Color.BLACK);
         FileFilter filtro = new FileNameExtensionFilter(".c", "c");
         archivofileChooser.setFileFilter(filtro);
         
@@ -55,6 +56,10 @@ public class LexerGUI extends javax.swing.JFrame {
         tablaErrores.setFillsViewportHeight(true);
         
         panelErrores.add(tablaTokensSP);
+    }
+    
+    public void mostrarErroresSemanticos(String message){
+        semanticoTxtArea.setText(message);
     }
     
     @SuppressWarnings("unchecked")
@@ -259,6 +264,7 @@ public class LexerGUI extends javax.swing.JFrame {
                                                 "Advertencia", JOptionPane.ERROR_MESSAGE);
         }else{
             //Analizar el archivo
+            semanticoTxtArea.setText("");
             try{
                 /*ArrayList<Lexema> lexemas = archivoController.analizarArchivo();
                 
@@ -348,6 +354,6 @@ public class LexerGUI extends javax.swing.JFrame {
     private javax.swing.JPanel panelErrores;
     private javax.swing.JTabbedPane panelVisor;
     private javax.swing.JTextArea parserTxtArea;
-    private javax.swing.JTextArea semanticoTxtArea;
+    public javax.swing.JTextArea semanticoTxtArea;
     // End of variables declaration//GEN-END:variables
 }

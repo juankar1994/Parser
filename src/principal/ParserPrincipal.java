@@ -3,6 +3,7 @@ package principal;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import parser.view.LexerGUI;
 
 public class ParserPrincipal {
 

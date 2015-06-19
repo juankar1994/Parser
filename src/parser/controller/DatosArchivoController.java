@@ -1,6 +1,7 @@
 
 package parser.controller;
 
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,12 +22,21 @@ import parser.data.Parser;
 import parser.data.Token;
 import parser.data.ErrorData;
 import parser.data.sym;
+import parser.view.LexerGUI;
 
 public class DatosArchivoController {
     
     //Referencia al archivo leído
     ArchivoData archivoData = new ArchivoData();
     ErrorData errorData;
+    private static DatosArchivoController instance = null;
+    
+    public static DatosArchivoController getInstance() {
+      if(instance == null) {
+         instance = new DatosArchivoController();
+      }
+      return instance;
+   }
     
     public void setArchivo(JFileChooser archivoSeleccionado, String comando){
         if(comando.equals(JFileChooser.APPROVE_SELECTION)){
@@ -104,6 +114,14 @@ public class DatosArchivoController {
                 msjErrores += "Error Sintáctico: " + error.getId() + "\n\tMotivo: " + tituloTexto + "  \n\tMensaje: " + error.getMessage() + "\n";
         }
         return msjErrores;
+    }
+    
+    public void mostrarErroresSemanticos(String message){
+        for (Window w : LexerGUI.getWindows()) {
+    		if ( w instanceof LexerGUI) {
+                    ((LexerGUI)w).semanticoTxtArea.setText(((LexerGUI)w).semanticoTxtArea.getText() + message + "\n");
+    		}
+    	}
     }
     
     public Object[][] getListaTokensErrores(ArrayList<Lexema> lexemas){
