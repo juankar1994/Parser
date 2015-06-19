@@ -77,7 +77,7 @@ public class DatosArchivoController {
             }else{
                 //Hacer la lista de los Tokens no válidos
                 lexemasErrores.add(lexema);
-            }   
+            } 
         }
         lexemasTotales.add(lexemasValidos);
         lexemasTotales.add(lexemasErrores);
@@ -97,9 +97,11 @@ public class DatosArchivoController {
                 Object value = fld[i].get(fld[i].getName());
                 value = "#" + value;
                 if(value.equals(error.getTitle()))
-                    tituloTexto = fld[i].getName();
-            }   
-            msjErrores += "Error Sintáctico: " + error.getId() + "\n\tMotivo: " + tituloTexto + "  \n\tMensaje: " + error.getMessage() + "\n";
+                    tituloTexto = fld[i].getName();                    
+            }
+            //Evitar errores léxicos
+            if(!tituloTexto.equals("ERROR"))
+                msjErrores += "Error Sintáctico: " + error.getId() + "\n\tMotivo: " + tituloTexto + "  \n\tMensaje: " + error.getMessage() + "\n";
         }
         return msjErrores;
     }
@@ -119,7 +121,8 @@ public class DatosArchivoController {
             lineasFinales = key.toString();
             if(Collections.frequency(lineas, key) > 1)
                 lineasFinales += "(" + Collections.frequency(lineas, key) + ")";
-            listaTokensErrores[cont] = new Object[] { lexemas.get(cont).getType(), lineasFinales};
+            listaTokensErrores[cont] = new Object[] { (!"".equals(lexemas.get(cont).getValue().toString())) 
+                                    ? lexemas.get(cont).getValue() : "Fin de comentario incorrecto", ((Object)(Integer.valueOf(lineasFinales) + 1)) };
             
             cont++;
         }

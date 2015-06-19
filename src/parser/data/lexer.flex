@@ -62,9 +62,6 @@ ContenioComentario = ([^*]|\*+[^/*])*
 %%
 <YYINITIAL>{
 
-    /* null literal */
-    "null"                         { return sym(sym.LITERAL_NULL); }
-
     /* separators */
      "("                            { return sym(sym.LPAREN); }
      ")"                            { return sym(sym.RPAREN); }

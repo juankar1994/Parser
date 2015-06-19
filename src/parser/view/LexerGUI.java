@@ -44,8 +44,6 @@ public class LexerGUI extends javax.swing.JFrame {
         JScrollPane tablaTokensSP = new JScrollPane(tablaTokens);
         tablaTokensSP.setBounds(10, 10, 655, 350);
         tablaTokens.setFillsViewportHeight(true);
-        
-        panelTokens.add(tablaTokensSP);
     }
     
     public void crearTablaErrores(){
@@ -75,11 +73,13 @@ public class LexerGUI extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         archivoTxtArea = new javax.swing.JTextArea();
-        panelTokens = new javax.swing.JPanel();
         panelErrores = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         parserTxtArea = new javax.swing.JTextArea();
+        jPanel3 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        semanticoTxtArea = new javax.swing.JTextArea();
         jButton2 = new javax.swing.JButton();
 
         archivoFileDialog.setMinimumSize(new java.awt.Dimension(623, 397));
@@ -162,19 +162,6 @@ public class LexerGUI extends javax.swing.JFrame {
 
         panelVisor.addTab("Visor del archivo", jPanel1);
 
-        javax.swing.GroupLayout panelTokensLayout = new javax.swing.GroupLayout(panelTokens);
-        panelTokens.setLayout(panelTokensLayout);
-        panelTokensLayout.setHorizontalGroup(
-            panelTokensLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 685, Short.MAX_VALUE)
-        );
-        panelTokensLayout.setVerticalGroup(
-            panelTokensLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 369, Short.MAX_VALUE)
-        );
-
-        panelVisor.addTab("Lista de tokens", panelTokens);
-
         javax.swing.GroupLayout panelErroresLayout = new javax.swing.GroupLayout(panelErrores);
         panelErrores.setLayout(panelErroresLayout);
         panelErroresLayout.setHorizontalGroup(
@@ -186,7 +173,7 @@ public class LexerGUI extends javax.swing.JFrame {
             .addGap(0, 369, Short.MAX_VALUE)
         );
 
-        panelVisor.addTab("Lista de errores", panelErrores);
+        panelVisor.addTab("Lista de errores léxicos", panelErrores);
 
         parserTxtArea.setColumns(20);
         parserTxtArea.setRows(5);
@@ -210,7 +197,31 @@ public class LexerGUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        panelVisor.addTab("Análisis Sintáctico", jPanel2);
+        panelVisor.addTab("Lista de errores sintácticos", jPanel2);
+
+        semanticoTxtArea.setColumns(20);
+        semanticoTxtArea.setRows(5);
+        semanticoTxtArea.setEnabled(false);
+        jScrollPane3.setViewportView(semanticoTxtArea);
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 665, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 334, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        panelVisor.addTab("Lista de errores semánticos", jPanel3);
 
         getContentPane().add(panelVisor, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 170, 690, 400));
 
@@ -253,7 +264,7 @@ public class LexerGUI extends javax.swing.JFrame {
                 
                 ArrayList<ArrayList<Lexema>> lexemasDivididos = archivoController.separarTokens(lexemas);
                 
-                Object[][] filaTokensValidos = archivoController.getListaTokensValidos(lexemasDivididos.get(0));
+                //Object[][] filaTokensValidos = archivoController.getListaTokensValidos(lexemasDivididos.get(0));
                 Object[][] filaTokensErrores = archivoController.getListaTokensErrores(lexemasDivididos.get(1));
                 
                 String columnas[] = {"Token","Tipo","Línea"};
@@ -263,8 +274,7 @@ public class LexerGUI extends javax.swing.JFrame {
                 String columnas2[] = {"Token", "Línea"};
                 DefaultTableModel modelo2 = new DefaultTableModel(filaTokensErrores , columnas2);
                 tablaErrores.setModel(modelo2);*/
-                
-                
+               
                 archivoController.analizarArchivoSintactico();
                 parserTxtArea.setText(archivoController.mostrarErroresSintacticos());
                 
@@ -328,14 +338,16 @@ public class LexerGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblNbrArchivo;
     private javax.swing.JLabel lblNombreArchivo;
     private javax.swing.JPanel panelErrores;
-    private javax.swing.JPanel panelTokens;
     private javax.swing.JTabbedPane panelVisor;
     private javax.swing.JTextArea parserTxtArea;
+    private javax.swing.JTextArea semanticoTxtArea;
     // End of variables declaration//GEN-END:variables
 }

@@ -64,7 +64,7 @@ DIRECTIVAS = "#"(define|if|elif|message|undef|ifdef|include|else|endif|error)
 SPECIFIER = "typedef" | "extern" | "static" | "auto" | "register" | "const" | "volatile"
 RETURN_TYPE = "int" | "float" | "double" | "char" | "string"
 
-PALABRAS_RESERVADAS = "break" | "case" | "char" | "const" | "continue" | "default" | "do" | 
+PALABRA_RESERVADA = "break" | "case" | "char" | "const" | "continue" | "default" | "do" | 
                       "else" | "for" | "if" | "int" | "long" | "return" | "short" |"switch" | "void" | "while"
 
 OPERADORES = "||" | "&&" | "(" | ")" |
@@ -181,67 +181,41 @@ ContenioComentario = ([^*]|\*+[^/*])*
 
     /*** SENTENCIAS ***/
     "if"                {   System.out.println(" IF ");
+                            lexeme= lexema(PALABRA_RESERVADA,yytext());
                             return symbol(sym.IF,"if"); }
 
     "else"                {   System.out.println(" ELSE ");
+                            lexeme= lexema(PALABRA_RESERVADA,yytext());
                             return symbol(sym.ELSE,"else"); }
 
     "while"             {   System.out.println(" WHILE ");
+                            lexeme= lexema(PALABRA_RESERVADA,yytext());
                             return symbol(sym.WHILE,"while"); }
 
-    "do"                {   System.out.println(" DOWHILE ");
-                            return symbol(sym.DO,"do"); }
-
-    "for"               {   System.out.println(" FOR ");
-                            return symbol(sym.FOR,"for"); }
-
-    "switch"            {   System.out.println(" SWITCH ");
-                            return symbol(sym.SWITCH,"switch"); }
-
-    /*** PALABRAS_RESERVADAS ***/
-    "default"           {   System.out.println(" DEFAULT ");
-                            return symbol(sym.DEFAULT,"default"); }
-
-    "case"              {   System.out.println(" CASE ");
-                            return symbol(sym.CASE,"case"); }
+    /*** PALABRA_RESERVADA ***/
 
     "return"              {   System.out.println(" RETURN ");
+                            lexeme= lexema(PALABRA_RESERVADA,yytext());
                             return symbol(sym.RETURN,"return"); }
-
-    "break"              {   System.out.println(" BREAK ");
-                            return symbol(sym.BREAK,"break"); }
-
-    "continue"               {   System.out.println(" CONTINUE ");
-                            return symbol(sym.CONTINUE,"continue"); }
 
     "void"              {   System.out.println(" VOID ");
                             return symbol(sym.VOID,"void"); }
                             
     /** FUNCIONES **/
     "read"              {   System.out.println(" READ ");
+                            lexeme= lexema(READ,yytext());
                             return symbol(sym.READ,"read"); }
     
     "write"             {   System.out.println(" WRITE ");
+                            lexeme= lexema(WRITE,yytext());
                             return symbol(sym.WRITE,"write"); }
                             
                             
     /*** TIPOS ***/
 
-
-    "char"              {   System.out.println(" CHAR ");
-                            return symbol(sym.CHAR,"char"); }
-
     "int"               {   System.out.println(" INT ");
+                            lexeme= lexema(TIPO_DATO,yytext()); 
                             return symbol(sym.INT,"int"); }
-
-    "short"             {   System.out.println(" SHORT ");
-                            return symbol(sym.SHORT,"short"); }
-
-    "long"              {   System.out.println(" LONG ");
-                            return symbol(sym.LONG,"long"); }
-
-    "const"             {   System.out.println(" CONST ");
-                            return symbol(sym.CONST,"const"); }
                    
     {NUMERO_ENTERO}     { 
                             System.out.println(" NUMERO_ENTERO "); 
@@ -265,24 +239,20 @@ ContenioComentario = ([^*]|\*+[^/*])*
     {ESPACIO} | {COMENTARIO} {/*Ignorar*/}
     \" {string = "\""; yybegin(STRING_STATE);}
     "/*"        {yybegin(COMENTARIO_STATE);}
-    . | 0{NUMERO}* {lexeme = lexema(ERROR); return symbol(sym.error);}
-    <<EOF>> { System.out.println(" EOF ");  return symbol(sym.EOF);}
+    . | 0{NUMERO}* {lexeme = lexema(ERROR,yytext()); return symbol(sym.ERROR);}
+    <<EOF>> {  return symbol(sym.EOF);}
 }
 <STRING_STATE>{
     {CARACTER}+         { string = string.concat(yytext());} 
-    \"                  {   yybegin(YYINITIAL);string = string.concat(yytext());
-                            System.out.println(" LITERAL STRING ");    
-                            lexeme = lexema(LITERAL_STRING,string); return symbol(sym.LITERAL_STRING);
-                        }
-
+    
     {FINDELINEA}        {   yybegin(YYINITIAL); string.concat(yytext()); 
-                            lexeme = lexema(ERROR,string); return symbol(sym.error);
+                            lexeme = lexema(ERROR,string); return symbol(sym.ERROR);
                         }
     <<EOF>>             {   yybegin(YYINITIAL); string.concat(yytext()); 
-                            lexeme = lexema(ERROR,string); return symbol(sym.error);
+                            lexeme = lexema(ERROR,string); return symbol(sym.ERROR);
                         }
 }
 <COMENTARIO_STATE>{
     [^*] {/*Ignorar*/}
-    <<EOF>> { yybegin(YYINITIAL); lexeme = lexema(ERROR,yytext()); return symbol(sym.error);}
+    <<EOF>> { yybegin(YYINITIAL); lexeme = lexema(ERROR,yytext()); return symbol(sym.ERROR);}
 }
