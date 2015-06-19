@@ -13,4 +13,12 @@ int x(){
 	int abx = 10;
 	read();
 	hola();
+	if(10){
+	}else{
+		
+	}
+
+	holas();
+
+
 }

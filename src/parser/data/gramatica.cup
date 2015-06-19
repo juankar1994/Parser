@@ -19,6 +19,7 @@ parser code {:
     ErrorData detectedError;
     public Hashtable<String, InfoKey> tablaSimbolos = new Hashtable<String, InfoKey>();
     public Stack<RegistroSemantico> pilaSemantica = new Stack<>();
+    String assemblyFile = "";
     
     /* Reporte de error encontrado. */
 
@@ -133,6 +134,7 @@ non terminal            condicion, valor;
 non terminal            decision_funcion, decision_operacion, validar_expr, declaracion_var_interna;
 non terminal            operacion_bin_1, operacion_bin_2, operador, comparador, condicion_2;
 non terminal            literal, fin_archivo, declaration_part, function_declaration_part, id_declaration, verification_part;
+non terminal            condicion_stmt, test_if, start_if, else_stmt;
 
 precedence left OR, AND;
 precedence left ADD, SUBSTRACT;
@@ -260,9 +262,11 @@ precedence left TIMES, DIVISION, MODULUS;
 
     call_function       ::= IDENTIFICADOR LPAREN RPAREN | read_f | write_f ;
             
-    condicion           ::= condicion_2 AND condicion | condicion_2 OR condicion | condicion_2;
+    condicion           ::= condicion_2 AND condicion | 
+                            condicion_2 OR condicion | 
+                            condicion_2:exp {: RESULT = exp; :};
 
-    condicion_2         ::= expresion;
+    condicion_2         ::= expresion:exp {: RESULT = exp; :};
 
     read_f              ::= READ LPAREN IDENTIFICADOR RPAREN | READ LPAREN RPAREN | 
                             READ LPAREN error{: parser.report_error(" parámetros incorrectos en el READ.", ""); :} RPAREN;
@@ -272,8 +276,13 @@ precedence left TIMES, DIVISION, MODULUS;
 
     write_f_aux         ::= write_f_aux COMMA expresion | expresion; 
         
-    if_statement        ::= IF LPAREN condicion RPAREN bloque else_statement |
-                            IF LPAREN 
+    if_statement        ::= start_if LPAREN condicion_stmt test_if bloque else_statement 
+                                    {: 
+                                        parser.assemblyFile += "exit_label: \n";
+                                        System.out.println("IF: " + parser.assemblyFile);
+                                        parser.pilaSemantica.pop();
+                                    :};
+                            /*IF LPAREN 
                                 error {: parser.report_error(" una condición válida para el IF.", ""); :} 
                             RPAREN bloque else_statement |
                             IF LPAREN
@@ -281,9 +290,32 @@ precedence left TIMES, DIVISION, MODULUS;
                             bloque| 
                             IF  
                                 error {: parser.report_error(" un LPAREN al final de la condición del IF.", ""); :} 
-                            RPAREN bloque else_statement;
+                            RPAREN bloque else_statement;*/
 
-    else_statement      ::= ELSE bloque |;
+    start_if            ::= IF:tipo {:
+                                    RegistroSemanticoSTMT RS_IF = new RegistroSemanticoSTMT(tipo.toString(), "RS_IF");//Crear RS_IF
+                                    RS_IF.addEtiqueta("else_label");
+                                    RS_IF.addEtiqueta("exit_label");
+                                    parser.pilaSemantica.push(RS_IF);
+                                :};
+
+    condicion_stmt      ::= condicion:exp {:
+                                    parser.pilaSemantica.push(new RegistroSemantico(exp.toString(), "RS_DO"));//Crear RS_DO
+                                :};
+
+    test_if             ::= RPAREN {:
+                                    RegistroSemantico RS_DO = parser.pilaSemantica.pop();
+                                    System.out.println("TEST_IF: " + RS_DO.getToken());
+                                    parser.assemblyFile+= "cmp eax, ebx \n";
+                                    parser.assemblyFile+= "JNZ else_label \n" ;
+                                :};
+
+    else_statement      ::= else_stmt bloque |;
+
+    else_stmt           ::= ELSE {:
+                                     parser.assemblyFile += "JMP exit_label \n";
+                                     parser.assemblyFile += "else_label: \n";
+                                 :};
 
     while_statement     ::= WHILE LPAREN condicion RPAREN bloque|
                             WHILE LPAREN
