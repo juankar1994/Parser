@@ -23,19 +23,12 @@ parser code {:
     
     /* Reporte de error encontrado. */
 
-    public void report_error(String message,String tipo, Object info) {
+    public void report_error(String message,int line, int column) {
         StringBuilder m = new StringBuilder("Error");
-        if (info instanceof java_cup.runtime.Symbol) {
-            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
-            if (s.left >= 0) {                
-                m.append(" en la línea "+(s.left+1));
-                if (s.right >= 0)
-                    m.append(", columna "+(s.right+1));
-            }
-        }
+        m.append(" en la línea "+(line+1));
+        m.append(", columna "+(column+1));
         m.append(" : " + message);
         archivoController.mostrarErroresSemanticos(m.toString());
-
     }
     public void report_error(String message, Object info) {
         if (info instanceof String){
@@ -145,8 +138,8 @@ precedence left TIMES, DIVISION, MODULUS;
 
     inicio              ::= programa_c;
 
-    programa_c          ::=   declaration_part id_declaration verification_part SEMICOLON
-                                {: int a = 10;
+    programa_c          ::=   declaration_part id_declaration verification_part SEMICOLON:s
+                                {: 
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
                                     if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){
@@ -162,7 +155,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                     }else{
                                         if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
                                             parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
-                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", ""); 
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado 1.", sleft,sright); 
                                         }
                                     }
                                 :}  programa_c 
@@ -181,7 +174,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                     }else{
                                         if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
                                             parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
-                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", s); 
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", sleft,sright); 
                                         }
                                     }
                                 :} programa_c 
@@ -200,7 +193,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                     }else{
                                         if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
                                             parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
-                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", "semántico", s); 
+                                            parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", sleft,sright); 
                                         }
                                     }
                                 :} programa_c 
