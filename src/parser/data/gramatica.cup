@@ -160,10 +160,10 @@ precedence left TIMES, DIVISION, MODULUS;
                                 :} programa_c 
                             | declaration_part id_declaration decision_operacion:s
                                 {:
+                                    RegistroSemantico RS_DO = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
-                                    System.out.println("------------------"+RS_ID.getToken());
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
-                                    if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){                                    
+                                    if(parser.tablaSimbolos.get(RS_ID.getToken()) == null ){                                    
                                         parser.tablaSimbolos.put(RS_ID.getToken(), 
                                                                  new InfoKey("Función", 
                                                                               RS_TIPO.getToken())); 
@@ -172,7 +172,6 @@ precedence left TIMES, DIVISION, MODULUS;
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getCategoria());
                                     }else{
-                                        System.out.println("-------------NO______________");
                                         if(parser.tablaSimbolos.get(RS_ID.getToken()).getNumDeclarado() <= 1){
                                             parser.tablaSimbolos.get(RS_ID.getToken()).sumarDeclarado();
                                             parser.report_error(" identificador '" + RS_ID.getToken() + "' ya ha sido declarado.", sleft,sright); 
