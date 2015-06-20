@@ -7,10 +7,14 @@ int b;
 void b();
 
 
-void x();
-
 int x(){
 	int abx = 10;
+    if(abx){
+        
+    }
+    else{
+        
+    }
     return abx;
 
 }

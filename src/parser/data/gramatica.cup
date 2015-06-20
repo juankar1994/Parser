@@ -160,13 +160,13 @@ precedence left TIMES, DIVISION, MODULUS;
                                 :} programa_c 
                             | declaration_part id_declaration decision_operacion:s
                                 {:
-                                    RegistroSemantico RS_DO = parser.pilaSemantica.pop();
+                                    RegistroSemantico RS_DO = parser.pilaSemantica.pop(); //VALOR DE RETORNO FUNCION--VER DESPUES
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
                                     if(parser.tablaSimbolos.get(RS_ID.getToken()) == null ){                                    
                                         parser.tablaSimbolos.put(RS_ID.getToken(), 
                                                                  new InfoKey("Función", 
-                                                                              RS_TIPO.getToken())); 
+                                                                              RS_TIPO.getToken(),RS_ID.getToken())); 
                                         System.out.println("DATOS TABLA SIMBOLOS FUNCION INT");
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
@@ -306,7 +306,7 @@ precedence left TIMES, DIVISION, MODULUS;
         
     if_statement        ::= start_if LPAREN condicion_stmt test_if bloque else_statement 
                                     {: 
-                                        parser.assemblyFile += "exit_label: \n";
+                                        parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label()+": \n";
                                         System.out.println("IF: " + parser.assemblyFile);
                                         parser.pilaSemantica.pop();
                                     :};
@@ -327,22 +327,20 @@ precedence left TIMES, DIVISION, MODULUS;
                                     parser.pilaSemantica.push(RS_IF);
                                 :};
 
-    condicion_stmt      ::= condicion:exp {:
-                                    parser.pilaSemantica.push(new RegistroSemantico(exp.toString(), "RS_DO"));//Crear RS_DO
-                                :};
+    condicion_stmt      ::= condicion;
 
     test_if             ::= RPAREN {:
                                     RegistroSemantico RS_DO = parser.pilaSemantica.pop();
                                     System.out.println("TEST_IF: " + RS_DO.getToken());
-                                    parser.assemblyFile+= "cmp eax, ebx \n";
-                                    parser.assemblyFile+= "JNZ "+ ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label() +  "\n" ;
+                                    parser.assemblyFile+= "cmp eax, ebx \n"; //FALTA GENERAR CODIGO DE COMPARACION
+                                    parser.assemblyFile+= "JNZ "+ ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label() +  "\n" ;
                                 :};
 
     else_statement      ::= else_stmt bloque |;
 
     else_stmt           ::= ELSE {:
-                                     parser.assemblyFile += "JMP exit_label \n";
-                                     parser.assemblyFile += "else_label: \n";
+                                     parser.assemblyFile += "JMP "+((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label()+" \n";
+                                     parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label()+": \n";
                                  :};
 
     while_statement     ::= WHILE LPAREN condicion RPAREN bloque|
@@ -401,13 +399,14 @@ precedence left TIMES, DIVISION, MODULUS;
 
     valor               ::= IDENTIFICADOR:i 
                             {:  RegistroSemantico RS_DO = new RegistroSemantico(i.toString(),"RS_DO_D");
+                                System.out.println("---------------CREADO-"+i.toString()+"---------------");
                                 if( parser.tablaSimbolos.get(RS_DO.getToken()) ==null){
                                     //CODIGO ERROR
                                 }
                                 parser.pilaSemantica.push(RS_DO);
                             :} 
                             | LITERAL_ENTERO:lit 
-                            {:  System.out.println("---------------CREADO----------------");
+                            {:  System.out.println("---------------CREADO-LIT---------------");
                                 RegistroSemantico RS_DO = new RegistroSemantico(lit.toString(),"RS_DO_C",lit.toString());
                                 parser.pilaSemantica.push(RS_DO);
                             :} 

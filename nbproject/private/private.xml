@@ -3,9 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/InfoKey.java</file>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/IOperacion.java</file>
             <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/Parser.java</file>
-            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/view/LexerGUI.java</file>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/OperacionFactory.java</file>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/Suma.java</file>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/PilaSemantica.java</file>
             <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/gramatica.cup</file>
+            <file>file:/C:/Users/JuanCarlos/Documents/GitHub/Parser/src/parser/data/RegistroSemantico.java</file>
         </group>
     </open-files>
 </project-private>
