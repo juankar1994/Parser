@@ -44,7 +44,17 @@ public class TablaSimbolos {
         tempVars.add(label);
         return label;
     }
+
+    public ArrayList<String> getTempVars() {
+        return tempVars;
+    }
+
+    public void setTempVars(ArrayList<String> tempVars) {
+        this.tempVars = tempVars;
+    }
     
-    
+    public void addVar(String id){
+        this.tempVars.add(id);
+    }
     
 }

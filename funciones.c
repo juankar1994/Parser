@@ -1,18 +1,22 @@
-int a = 12;
+int a = 12-1;
 
-int x(){
+void x(){
 	int abx = 1;
 	int b;
-	a = 12 - 10;
+	b = 12 - 10;
 	abx= !a;
 	b = abx + a;
-	int c;
+	
+	while(1+2){
+
+	}
+    
     if(abx){
         
     }
     else{
         
     }
-    return abx;
 
+    //return abx; PREGUNTAR
 }

@@ -11,9 +11,8 @@ public class Not extends Operacion{
         String valor1 = ((RegistroSemanticoVar)getRS_OP1()).getDireccion();
         System.out.println(valor1);
         String code = "\tmov eax, "+ valor1 + "\n";
-        code += "\tnot eax\n";
-        code += "\tmov byte["+this.getVarReturn()+"],eax" + "\n";
+        code += "\tneg eax\n";
+        code += "\tmov ["+this.getVarReturn()+"],eax" + "\n";
         return code;
     }
-    
 }

@@ -15,7 +15,7 @@ public class Resta extends Operacion{
         String code = "\tmov eax, "+ valor2 + "\n";
         code += "\tmov ebx, "+ valor1 + "\n";
         code += "\tsub eax,ebx" + "\n";
-        code += "\tmov byte["+this.getVarReturn()+"],eax" + "\n";
+        code += "\tmov ["+this.getVarReturn()+"],eax" + "\n";
         return code;
     }
     

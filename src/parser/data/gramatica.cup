@@ -3,9 +3,9 @@ package parser.data;
 
 /* Import the class java_cup.runtime.*  */
 import java_cup.runtime.*;
+import java.util.ArrayList;
 import java.io.FileReader;
-import java.util.Hashtable;
-import java.util.Stack;
+import java.io.*;
 import parser.controller.DatosArchivoController;
    
 /* Codigo del parser, se copia integramente a la clase final.
@@ -76,6 +76,37 @@ parser code {:
             p.parse();
             System.out.println("\n*** Fin del parseo ***");
             System.out.println(p.assemblyFile);
+            PrintWriter writer = new PrintWriter("archivoEnsamblador.asm", "UTF-8");
+            writer.println("section .text\n\tglobal _start\n_start:  ");
+            writer.println(p.assemblyFile);
+            
+            BufferedReader br = new BufferedReader(new FileReader("restCode.asm"));
+                try {
+                    String line = br.readLine();
+
+                    while (line != null) {
+                        writer.append(line + "\n");
+                        line = br.readLine();
+                    }
+                } finally {
+                    br.close();
+                }
+
+            //Section .data
+            writer.println("section     .data\n");
+            ArrayList<String> TS = p.tablaSimbolos.getTempVars();
+            for(int i = 0; i < TS.size(); i++){
+                String valor = "";
+                try{
+                    valor = ((InfoKey) p.tablaSimbolos.get(TS.get(i))).getValor();
+                }catch(Exception e){
+                    valor = "          ";
+                }
+                System.out.println(TS.get(i));
+                writer.println("\t" + TS.get(i) + "    db '" + valor + "'");
+            }
+            writer.close();
+
             System.out.println("Total de errores = " + errors + ".");
             errors = 0;
         } catch (Exception ex) {
@@ -129,6 +160,7 @@ non terminal            decision_funcion, decision_operacion, validar_expr, decl
 non terminal            operacion_bin_1, operador, comparador, condicion_2;
 non terminal            literal, fin_archivo, declaration_part, function_declaration_part, id_declaration, verification_part;
 non terminal            condicion_stmt, test_if, start_if, else_stmt, variable;
+non terminal            start_while, test_while, id_fun_declaration;
 
 precedence left OR, AND;
 precedence left ADD, SUBSTRACT;
@@ -140,14 +172,17 @@ precedence left TIMES, DIVISION, MODULUS;
     inicio              ::= programa_c;
 
     programa_c          ::=   variable  programa_c 
-                            | function_declaration_part id_declaration decision_operacion:s 
+                            | function_declaration_part id_fun_declaration decision_operacion:s 
                                 {:
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
+                                    System.out.println("DATOS DE LA FUNCIÓN-------------------");
+                                    System.out.println(RS_ID.getToken());
                                     if(parser.tablaSimbolos.get(RS_ID.getToken()) == null){                                    
                                         parser.tablaSimbolos.put(RS_ID.getToken(), 
                                                                  new InfoKey("Función", 
                                                                               RS_TIPO.getToken())); 
+                                        parser.assemblyFile += "\tret\n";
                                         System.out.println("DATOS TABLA SIMBOLOS FUNCION");
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getValor());
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(RS_ID.getToken())).getTipo());
@@ -159,7 +194,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                         }
                                     }
                                 :} programa_c 
-                            | declaration_part id_declaration decision_operacion:s
+                            | declaration_part id_fun_declaration decision_operacion:s
                                 {:
                                     System.out.println("*************************************");
                                     RegistroSemantico RS_DO = parser.pilaSemantica.pop(); //VALOR DE RETORNO FUNCION--VER DESPUES
@@ -204,6 +239,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                                                  new InfoKey("Identificador", 
                                                                               RS_TIPO.getToken(), 
                                                                               valor)); 
+                                        parser.tablaSimbolos.addVar(id);
                                         System.out.println("DATOS TABLA SIMBOLOS");
                                         System.out.println(id);
                                         System.out.println(((InfoKey) parser.tablaSimbolos.get(id)).getValor());
@@ -217,19 +253,24 @@ precedence left TIMES, DIVISION, MODULUS;
                                     }
                                 :};
 
-    declaration_part            ::= INT:tipo {: 
+    declaration_part            ::= INT:tipo {:
                                         parser.pilaSemantica.push(new RegistroSemantico(tipo.toString(), "RS_TIPO"));//Crear RS_Tipo
-                                        RESULT = tipo;
                                     :};
     
     function_declaration_part   ::= VOID:tipo {: 
                                         parser.pilaSemantica.push(new RegistroSemantico(tipo.toString(), "RS_TIPO"));//Crear RS_Tipo
-                                        RESULT = tipo;
                                     :};
 
     id_declaration              ::= IDENTIFICADOR:id {: 
-                                        parser.pilaSemantica.push(new RegistroSemantico(id.toString(), "RS_ID"));//Crear RS_Tipo
-                                        RESULT = id;
+                                        parser.pilaSemantica.push(new RegistroSemantico(id.toString(), "RS_ID"));//Crear RS_ID
+                                    :};
+
+
+    id_fun_declaration          ::= IDENTIFICADOR:id {: 
+                                        RegistroSemanticoSTMT RS_ID = new RegistroSemanticoSTMT(id.toString(), "RS_ID_F");//Crear RS_ID_F
+                                        RS_ID.setStmt_label(parser.tablaSimbolos.getLabelName());
+                                        parser.pilaSemantica.push(RS_ID);
+                                        parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_ID_F")).getStmt_label()+": \n";
                                     :};
 
     verification_part           ::= validar_expr:exp;
@@ -273,9 +314,13 @@ precedence left TIMES, DIVISION, MODULUS;
     
     asignacion          ::= IDENTIFICADOR:i op_asignaciones expresion
                             {:
-                                RegistroSemanticoVar RS_DO = (RegistroSemanticoVar) parser.pilaSemantica.pop();
-                                System.out.println("---------------------"+RS_DO.getDireccion()+"------------------");
-                                parser.tablaSimbolos.get(i.toString()).setDireccion(RS_DO.getDireccion());
+                                if( parser.tablaSimbolos.get(i.toString()) ==null){
+                                    parser.report_error(" Variable '" + i.toString() + "' no ha sido declarada.", ileft,iright); 
+                                }else{
+                                    RegistroSemanticoVar RS_DO = (RegistroSemanticoVar) parser.pilaSemantica.pop();
+                                    System.out.println("---------------------"+RS_DO.getDireccion()+"------------------");
+                                    parser.tablaSimbolos.get(i.toString()).setDireccion(RS_DO.getDireccion());
+                                }   
                             :};
 
     op_asignaciones     ::= ASSIGN ;
@@ -375,18 +420,38 @@ precedence left TIMES, DIVISION, MODULUS;
                                      parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label()+": \n";
                                  :};
 
-    while_statement     ::= WHILE LPAREN condicion RPAREN bloque|
-                            WHILE LPAREN
+    while_statement     ::= start_while LPAREN condicion_stmt test_while bloque {:
+                                parser.assemblyFile += "\tJMP "+((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_WHILE")).getStmt_label()+" \n";
+                                parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_WHILE")).getExit_label()+": \n";
+                                parser.pilaSemantica.pop();
+                            :}
+                            | start_while LPAREN
                                 error {: parser.report_error("una condición valida para el WHILE.", ""); :} 
                             RPAREN bloque|
-                            WHILE LPAREN
+                            start_while LPAREN
                                 error {: parser.report_error(" un RPAREN al final de la condición del WHILE.", ""); :} 
                             bloque
-                            | WHILE 
+                            | start_while 
                                 error {: parser.report_error(" un LPAREN al final de la condición del WHILE.", ""); :} 
                             RPAREN bloque;
+
+    start_while         ::= WHILE:w {:
+                                RegistroSemanticoSTMT RS_WHILE = new RegistroSemanticoSTMT(w.toString(), "RS_WHILE");//Crear RS_WHILE
+                                RS_WHILE.setStmt_label(parser.tablaSimbolos.getLabelName());
+                                RS_WHILE.setExit_label(parser.tablaSimbolos.getLabelName());
+                                parser.pilaSemantica.push(RS_WHILE);    
+                                parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_WHILE")).getStmt_label()+": \n";
+                                
+                            :};
+
+    test_while          ::= RPAREN {:
+                                RegistroSemanticoVar RS_DO = (RegistroSemanticoVar)parser.pilaSemantica.pop();
+                                parser.assemblyFile+= "\tmov eax,"+RS_DO.getDireccion()+" \n"; 
+                                parser.assemblyFile+= "\tcmp eax, 0 \n"; 
+                                parser.assemblyFile+= "\tJNZ "+ ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_WHILE")).getExit_label() +  "\n" ;
+                            :};
     
-    return_stmt         ::= RETURN expresion:e1 {: RESULT = e1; :} SEMICOLON;
+    return_stmt         ::= RETURN expresion SEMICOLON;
 
     validar_expr        ::= ASSIGN expresion:exp {: RESULT = exp; :}
                             | ASSIGN error {: parser.report_error(" una expresión o falta ; al final.",""); :}
