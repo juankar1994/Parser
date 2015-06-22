@@ -4,7 +4,8 @@ package parser.data;
 public class InfoKey {
     private String categoria; 
     private String tipo;      
-    private String valor;     
+    private String valor;  
+    private String direccion;
     private int numDeclarado = 0;
 
     public InfoKey(String categoria, String tipo, String valor) {
@@ -55,4 +56,14 @@ public class InfoKey {
     public void setNumDeclarado(int numDeclarado) {
         this.numDeclarado = numDeclarado;
     }    
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+    
+    
 }

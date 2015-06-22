@@ -1,14 +1,6 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package parser.data;
 
-/**
- *
- * @author JuanCarlos
- */
 public class Suma extends Operacion{
     public Suma(){
         
@@ -16,7 +8,15 @@ public class Suma extends Operacion{
 
     @Override
     public String generarCodigo() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String valor1 = ((RegistroSemanticoVar)getRS_OP1()).getDireccion();
+        System.out.println(valor1);
+        String valor2 = ((RegistroSemanticoVar)getRS_OP2()).getDireccion();
+        System.out.println(valor2);
+        String code = "\tmov eax, "+ valor2 + "\n";
+        code += "\tmov ebx, "+ valor1 + "\n";
+        code += "\tadd eax,ebx" + "\n";
+        code += "\tmov byte["+this.getVarReturn()+"],eax" + "\n";
+        return code;
     }
     
 }

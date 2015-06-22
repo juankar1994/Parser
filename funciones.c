@@ -1,14 +1,12 @@
 int a = 12;
-int a;
-int a = 20;
-int b;
-int b;
-int b;
-void b();
-
 
 int x(){
-	int abx = 10;
+	int abx = 1;
+	int b;
+	a = 12 - 10;
+	abx= !a;
+	b = abx + a;
+	int c;
     if(abx){
         
     }

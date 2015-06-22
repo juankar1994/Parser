@@ -13,4 +13,6 @@ public interface IOperacion {
     public String generarCodigo();
     public void setOperandos(RegistroSemantico RS_DO1,RegistroSemantico RS_DO2);
     public void setOperandor(RegistroSemantico RS_DO1);
+    public void setVarReturn(String varReturn);
+    public RegistroSemantico getRS_OP1();
 }

@@ -16,6 +16,11 @@ public class RegistroSemanticoVar extends RegistroSemantico{
         super(token, tipo, valor);
         setDireccion(direccion);
     }
+    
+    public RegistroSemanticoVar(String tipo, String direccion){
+        super(direccion, tipo,direccion);
+        setDireccion(direccion);
+    }
 
     public String getDireccion() {
         return direccion;

@@ -5,6 +5,7 @@
  */
 package parser.data;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 /**
@@ -13,11 +14,13 @@ import java.util.Hashtable;
  */
 public class TablaSimbolos {
     private Hashtable<String, InfoKey> tablaSimbolos;
+    private ArrayList<String> tempVars;
     private int numLabel = 1;
     private int numVar = 1;
 
     public TablaSimbolos() {
         tablaSimbolos = new Hashtable<String, InfoKey>();
+        tempVars = new ArrayList<>();
     }
     
     public InfoKey get(String pToken){
@@ -38,6 +41,7 @@ public class TablaSimbolos {
     public String getVarName(){
         String label = "var_" +numVar;
         numVar++;
+        tempVars.add(label);
         return label;
     }
     

@@ -75,6 +75,7 @@ parser code {:
             Parser p = new Parser(s);
             p.parse();
             System.out.println("\n*** Fin del parseo ***");
+            System.out.println(p.assemblyFile);
             System.out.println("Total de errores = " + errors + ".");
             errors = 0;
         } catch (Exception ex) {
@@ -160,6 +161,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                 :} programa_c 
                             | declaration_part id_declaration decision_operacion:s
                                 {:
+                                    System.out.println("*************************************");
                                     RegistroSemantico RS_DO = parser.pilaSemantica.pop(); //VALOR DE RETORNO FUNCION--VER DESPUES
                                     RegistroSemantico RS_ID = parser.pilaSemantica.pop();
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
@@ -182,6 +184,7 @@ precedence left TIMES, DIVISION, MODULUS;
 
     variable                    ::= declaration_part id_declaration verification_part SEMICOLON:s
                                 {:  
+                                    System.out.println("*************************************");
                                     RegistroSemantico RS_DO = parser.pilaSemantica.pop();
                                     String id,valor;
                                     if(RS_DO.getTipo()!="RS_ID"){
@@ -195,6 +198,7 @@ precedence left TIMES, DIVISION, MODULUS;
                                     }
                                     RegistroSemantico RS_TIPO = parser.pilaSemantica.pop();
                                     
+                                    System.out.println("*************************************");
                                     if(parser.tablaSimbolos.get(id) == null){
                                         parser.tablaSimbolos.put(id, 
                                                                  new InfoKey("Identificador", 
@@ -237,25 +241,42 @@ precedence left TIMES, DIVISION, MODULUS;
     funcion             ::= LPAREN RPAREN bloque_global | 
                             LPAREN error {: parser.report_error(" parámetro incorrecto.",""); :} RPAREN bloque_global;
     
-    bloque_global       ::= LBRACE declaracion_var_interna lista_sentencias RBRACE 
+    bloque_global       ::= LBRACE lista_sentencias RBRACE 
                             | LBRACE RBRACE
                             | error {: parser.report_error(" no se encuentra el LBRACE ACA .","");  :};
     
     bloque              ::= LBRACE lista_sentencias RBRACE | LBRACE RBRACE | 
                             error {: parser.report_error(" no se encuentra el LBRACE o expresión inválida.","");  :} decision_funcion;
 
-    declaracion_var_interna     ::= variable declaracion_var_interna | ;
 
     lista_sentencias    ::= lista_sentencias sentencia | sentencia ;
 
-    sentencia           ::= if_statement |  
+    sentencia           ::= if_statement | variable |  
                             while_statement | 
                             expresion SEMICOLON | 
-                            return_stmt ;
+                            return_stmt;
  
-    expresion           ::=  exp:exp1 {: RESULT = exp1; :} | EXCLAMACION exp | call_function | asignacion;
+    expresion           ::=  exp |
+                             EXCLAMACION exp 
+                             {:
+                                RegistroSemanticoVar RS_DO = (RegistroSemanticoVar) parser.pilaSemantica.pop();
+                                String var = parser.tablaSimbolos.getVarName();
+                                IOperacion op = (IOperacion)new OperacionFactory("Not").getOp();
+                                op.setOperandor(RS_DO);
+                                op.setVarReturn(var);
+                                String code = op.generarCodigo();
+                                parser.assemblyFile += code;
+                                RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO.getTipo(),var);
+                                parser.pilaSemantica.push(RS_RESULT);
+
+                             :}| call_function | asignacion;
     
-    asignacion          ::= IDENTIFICADOR op_asignaciones exp;
+    asignacion          ::= IDENTIFICADOR:i op_asignaciones expresion
+                            {:
+                                RegistroSemanticoVar RS_DO = (RegistroSemanticoVar) parser.pilaSemantica.pop();
+                                System.out.println("---------------------"+RS_DO.getDireccion()+"------------------");
+                                parser.tablaSimbolos.get(i.toString()).setDireccion(RS_DO.getDireccion());
+                            :};
 
     op_asignaciones     ::= ASSIGN ;
 
@@ -263,10 +284,15 @@ precedence left TIMES, DIVISION, MODULUS;
                             {: RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
                                RegistroSemantico RS_OP= parser.pilaSemantica.pop();
                                RegistroSemantico RS_DO2= parser.pilaSemantica.pop();
+                               System.out.println(RS_DO1.getValor());
+                               String var = parser.tablaSimbolos.getVarName();
                                IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
                                op.setOperandos(RS_DO1,RS_DO2);
-                               op.generarCodigo();
-                               //Se crea una variable donde guardar Resultado
+                               op.setVarReturn(var);
+                               String code = op.generarCodigo();
+                               parser.assemblyFile += code;
+                               RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO1.getTipo(),var);
+                               parser.pilaSemantica.push(RS_RESULT);
                             :}|
                             valor comparador expresion  
                             {: RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
@@ -279,22 +305,29 @@ precedence left TIMES, DIVISION, MODULUS;
                             :}|
                             LPAREN expresion RPAREN |
                             valor operacion_bin_1  
-                            {: RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
-                               RegistroSemantico RS_OP= parser.pilaSemantica.pop();
+                            {: RegistroSemantico RS_OP= parser.pilaSemantica.pop();
+                               RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
+                               String var = parser.tablaSimbolos.getVarName();
                                IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
                                op.setOperandor(RS_DO1);
-                               op.generarCodigo();
-                               //Se crea una variable donde guardar Resultado
+                               op.setVarReturn(var);
+                               String code = op.generarCodigo();
+                               parser.assemblyFile += code;
+                               RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO1.getTipo(),var);
+                               parser.pilaSemantica.push(RS_RESULT);
+                               parser.tablaSimbolos.get(RS_DO1.getToken()).setDireccion(var);
                             :}|
                             valor;
 
+                            
+
     call_function       ::= IDENTIFICADOR LPAREN RPAREN | read_f | write_f ;
             
-    condicion           ::= condicion_2 AND condicion | 
+    condicion           ::= condicion_2 AND condicion |
                             condicion_2 OR condicion | 
-                            condicion_2:exp {: RESULT = exp; :};
+                            condicion_2;
 
-    condicion_2         ::= expresion:exp {: RESULT = exp; :};
+    condicion_2         ::= expresion;
 
     read_f              ::= READ LPAREN IDENTIFICADOR RPAREN | READ LPAREN RPAREN | 
                             READ LPAREN error{: parser.report_error(" parámetros incorrectos en el READ.", ""); :} RPAREN;
@@ -307,18 +340,17 @@ precedence left TIMES, DIVISION, MODULUS;
     if_statement        ::= start_if LPAREN condicion_stmt test_if bloque else_statement 
                                     {: 
                                         parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label()+": \n";
-                                        System.out.println("IF: " + parser.assemblyFile);
                                         parser.pilaSemantica.pop();
-                                    :};
-                            /*IF LPAREN 
+                                    :}
+                            |start_if LPAREN 
                                 error {: parser.report_error(" una condición válida para el IF.", ""); :} 
                             RPAREN bloque else_statement |
-                            IF LPAREN
+                            start_if LPAREN
                                     error {: parser.report_error(" un RPAREN al final de la condición del IF.", ""); :} 
                             bloque| 
-                            IF  
+                            start_if  
                                 error {: parser.report_error(" un LPAREN al final de la condición del IF.", ""); :} 
-                            RPAREN bloque else_statement;*/
+                            RPAREN bloque else_statement;
 
     start_if            ::= IF:tipo {:
                                     RegistroSemanticoSTMT RS_IF = new RegistroSemanticoSTMT(tipo.toString(), "RS_IF");//Crear RS_IF
@@ -330,16 +362,16 @@ precedence left TIMES, DIVISION, MODULUS;
     condicion_stmt      ::= condicion;
 
     test_if             ::= RPAREN {:
-                                    RegistroSemantico RS_DO = parser.pilaSemantica.pop();
-                                    System.out.println("TEST_IF: " + RS_DO.getToken());
-                                    parser.assemblyFile+= "cmp eax, ebx \n"; //FALTA GENERAR CODIGO DE COMPARACION
-                                    parser.assemblyFile+= "JNZ "+ ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label() +  "\n" ;
+                                    RegistroSemanticoVar RS_DO = (RegistroSemanticoVar)parser.pilaSemantica.pop();
+                                    parser.assemblyFile+= "\tmov eax,"+RS_DO.getDireccion()+" \n"; 
+                                    parser.assemblyFile+= "\tcmp eax, 0 \n"; 
+                                    parser.assemblyFile+= "\tJNZ "+ ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label() +  "\n" ;
                                 :};
 
     else_statement      ::= else_stmt bloque |;
 
     else_stmt           ::= ELSE {:
-                                     parser.assemblyFile += "JMP "+((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label()+" \n";
+                                     parser.assemblyFile += "\tJMP "+((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getExit_label()+" \n";
                                      parser.assemblyFile += ((RegistroSemanticoSTMT)parser.pilaSemantica.searchRS("RS_IF")).getStmt_label()+": \n";
                                  :};
 
@@ -398,16 +430,18 @@ precedence left TIMES, DIVISION, MODULUS;
                             :};
 
     valor               ::= IDENTIFICADOR:i 
-                            {:  RegistroSemantico RS_DO = new RegistroSemantico(i.toString(),"RS_DO_D");
+                            {:  RegistroSemanticoVar RS_DO = new RegistroSemanticoVar("RS_DO_D",i.toString());
                                 System.out.println("---------------CREADO-"+i.toString()+"---------------");
                                 if( parser.tablaSimbolos.get(RS_DO.getToken()) ==null){
-                                    //CODIGO ERROR
+                                    parser.report_error(" Variable '" + RS_DO.getToken() + "' no ha sido declarado.", ileft,iright); 
                                 }
+                                RS_DO.setValor(parser.tablaSimbolos.get(RS_DO.getToken()).getDireccion());
+                                RS_DO.setDireccion(parser.tablaSimbolos.get(RS_DO.getToken()).getDireccion());
                                 parser.pilaSemantica.push(RS_DO);
                             :} 
                             | LITERAL_ENTERO:lit 
                             {:  System.out.println("---------------CREADO-LIT---------------");
-                                RegistroSemantico RS_DO = new RegistroSemantico(lit.toString(),"RS_DO_C",lit.toString());
+                                RegistroSemanticoVar RS_DO = new RegistroSemanticoVar("RS_DO_C",lit.toString());
                                 parser.pilaSemantica.push(RS_DO);
                             :} 
                             | SUBSTRACT LITERAL_ENTERO:lit {: RESULT = lit; :};
