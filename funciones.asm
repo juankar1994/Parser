@@ -21,11 +21,7 @@ label_2:
 	add eax,ebx
 	mov [var_4],eax
 label_3: 
-	mov eax, 1
-	mov ebx, 2
-	add eax,ebx
-	mov [var_5],eax
-	mov eax,var_5 
+	mov eax,0 
 	cmp eax, 0 
 	JNZ label_4
 	call hola

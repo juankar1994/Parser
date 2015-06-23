@@ -351,12 +351,12 @@ precedence left TIMES, DIVISION, MODULUS;
                                 RegistroSemantico RS_OP= parser.pilaSemantica.pop();
                                 RegistroSemantico RS_DO2= parser.pilaSemantica.pop();
                                 String var = parser.tablaSimbolos.getVarName();
-                                IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
+                                /*IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
                                 op.setOperandos(RS_DO1,RS_DO2);
                                 op.setVarReturn(var);
                                 String code = op.generarCodigo();
-                                parser.assemblyFile += code;
-                                RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO1.getTipo(),var);
+                                parser.assemblyFile += code;*/
+                                RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO1.getTipo(),"0");
                                 parser.pilaSemantica.push(RS_RESULT);
                             :}|
                             LPAREN expresion RPAREN  |

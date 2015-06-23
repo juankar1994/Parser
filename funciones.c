@@ -1,3 +1,4 @@
+
 int a = 12-1;
 
 int hola(){
@@ -11,7 +12,7 @@ int x(){
 	abx= !a;
 	b = abx + a;
 	
-	while(1+2){
+	while(1==2){
 		hola();
 	}
     
