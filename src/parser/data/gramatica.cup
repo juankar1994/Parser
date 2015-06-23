@@ -76,7 +76,9 @@ parser code {:
             p.parse();
             System.out.println("\n*** Fin del parseo ***");
             System.out.println(p.assemblyFile);
-            PrintWriter writer = new PrintWriter("archivoEnsamblador.asm", "UTF-8");
+            File archivo = p.archivoController.getArchivoFromData();
+            String newArchivo = archivo.getName().replace(".c", "");
+            PrintWriter writer = new PrintWriter(newArchivo + ".asm", "UTF-8");
             writer.println("section .text\n\tglobal _start\n_start:  ");
             writer.println(p.assemblyFile);
 
@@ -344,15 +346,22 @@ precedence left TIMES, DIVISION, MODULUS;
                                parser.pilaSemantica.push(RS_RESULT);
                             :}|
                             valor comparador expresion  
-                            {: RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
-                               RegistroSemantico RS_OP= parser.pilaSemantica.pop();
-                               RegistroSemantico RS_DO2= parser.pilaSemantica.pop();
-                               IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
-                               op.setOperandos(RS_DO1,RS_DO2);
-                               op.generarCodigo();
-                               //Se crea una variable donde guardar Resultado
+                            {: 
+                                RegistroSemantico RS_DO1= parser.pilaSemantica.pop();
+                                RegistroSemantico RS_OP= parser.pilaSemantica.pop();
+                                RegistroSemantico RS_DO2= parser.pilaSemantica.pop();
+                                String var = parser.tablaSimbolos.getVarName();
+                                IOperacion op = (IOperacion)new OperacionFactory(RS_OP.getTipo()).getOp();
+                                op.setOperandos(RS_DO1,RS_DO2);
+                                op.setVarReturn(var);
+                                String code = op.generarCodigo();
+                                parser.assemblyFile += code;
+                                RegistroSemanticoVar RS_RESULT = new RegistroSemanticoVar(RS_DO1.getTipo(),var);
+                                parser.pilaSemantica.push(RS_RESULT);
                             :}|
-                            LPAREN expresion RPAREN |
+                            LPAREN expresion RPAREN  |
+                            LPAREN expresion RPAREN operador expresion |
+                            LPAREN expresion RPAREN comparador expresion |
                             valor operacion_bin_1  
                             {: 
                                RegistroSemantico RS_OP= parser.pilaSemantica.pop();

@@ -266,11 +266,11 @@ public class LexerGUI extends javax.swing.JFrame {
             //Analizar el archivo
             semanticoTxtArea.setText("");
             try{
-                /*ArrayList<Lexema> lexemas = archivoController.analizarArchivo();
+                ArrayList<Lexema> lexemas = archivoController.analizarArchivo();
                 
                 ArrayList<ArrayList<Lexema>> lexemasDivididos = archivoController.separarTokens(lexemas);
                 
-                //Object[][] filaTokensValidos = archivoController.getListaTokensValidos(lexemasDivididos.get(0));
+                Object[][] filaTokensValidos = archivoController.getListaTokensValidos(lexemasDivididos.get(0));
                 Object[][] filaTokensErrores = archivoController.getListaTokensErrores(lexemasDivididos.get(1));
                 
                 String columnas[] = {"Token","Tipo","Línea"};
@@ -279,7 +279,7 @@ public class LexerGUI extends javax.swing.JFrame {
             
                 String columnas2[] = {"Token", "Línea"};
                 DefaultTableModel modelo2 = new DefaultTableModel(filaTokensErrores , columnas2);
-                tablaErrores.setModel(modelo2);*/
+                tablaErrores.setModel(modelo2);
                
                 archivoController.analizarArchivoSintactico();
                 parserTxtArea.setText(archivoController.mostrarErroresSintacticos());

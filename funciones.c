@@ -7,7 +7,7 @@ int hola(){
 int x(){
 	int abx = 1;
 	int b;
-	b = 12 - 10;
+	b = (12 - 10) + 4;
 	abx= !a;
 	b = abx + a;
 	

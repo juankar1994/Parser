@@ -45,6 +45,7 @@ label_6:
 	mov eax, 1
 	mov ebx, 0
 	int 80h
+
 section     .data
 
 	var_1:    resb 1
