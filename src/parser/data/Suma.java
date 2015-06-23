@@ -9,9 +9,9 @@ public class Suma extends Operacion{
     @Override
     public String generarCodigo() {
         String valor1 = ((RegistroSemanticoVar)getRS_OP1()).getDireccion();
-        System.out.println(valor1);
+        System.out.println("__________________"+valor1);
         String valor2 = ((RegistroSemanticoVar)getRS_OP2()).getDireccion();
-        System.out.println(valor2);
+        System.out.println("__________________"+valor2);
         String code = "\tmov eax, "+ valor2 + "\n";
         code += "\tmov ebx, "+ valor1 + "\n";
         code += "\tadd eax,ebx" + "\n";
